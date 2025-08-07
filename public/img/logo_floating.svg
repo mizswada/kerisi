@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="#3B82F6"/>
+  
+  <!-- Chat bubble with better proportions -->
+  <path d="M16 20C16 17.7909 17.7909 16 20 16H28L32 12H36C38.2091 12 40 13.7909 40 16V24C40 26.2091 38.2091 28 36 28H32L28 32L24 28H20C17.7909 28 16 26.2091 16 24V20Z" fill="white"/>
+  
+  <!-- Message dots -->
+  <circle cx="22" cy="22" r="2" fill="#3B82F6"/>
+  <circle cx="28" cy="22" r="2" fill="#3B82F6"/>
+  <circle cx="34" cy="22" r="2" fill="#3B82F6"/>
+  
+  <!-- Smile -->
+  <path d="M22 26C22 26 24 28 28 28C32 28 34 26 34 26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

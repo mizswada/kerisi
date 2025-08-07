@@ -3,6 +3,7 @@ import { useLayoutStore } from "~/stores/layout";
 
 import RSHeader from "~/components/layouts/Header.vue";
 import RSSideMenu from "~~/components/layouts/sidemenu/index.vue";
+import RsFloatingChat from "~/components/RsFloatingChat.vue";
 // import RSConfigMenu from "~~/components/layouts/configmenu/index.vue";
 // import RSFooter from "~/components/layouts/Footer.vue";
 import { useWindowSize } from "vue-window-size";
@@ -26,6 +27,22 @@ function toggleMenu(event) {
   document.querySelector(".v-layout").classList.toggle("menu-hide");
   document.getElementsByClassName("menu-overlay")[0].classList.toggle("hide");
 }
+
+// Floating chat functionality
+const showFloatingChat = ref(true);
+const chatBadge = ref(null);
+
+const handleChatClick = () => {
+  // Handle chat click - you can open a modal, navigate to chat page, etc.
+  console.log('Floating chat clicked!');
+  // Example: Open chat modal or navigate to chat page
+  // navigateTo('/chat');
+};
+
+// Example: Set badge count (you can fetch this from API)
+const setChatBadge = (count) => {
+  chatBadge.value = count;
+};
 </script>
 
 <template>
@@ -38,4 +55,18 @@ function toggleMenu(event) {
   <div @click="toggleMenu" class="menu-overlay"></div>
 
   <!-- <RSFooter /> -->
+  
+  <!-- Floating Chat -->
+  <RsFloatingChat
+    :show="showFloatingChat"
+    :badge="chatBadge"
+    badge-color="danger"
+    position="bottom-right"
+    size="lg"
+    tooltip="Chat with us"
+    :use-image="true"
+    image="/img/logo_floating.png"
+    image-alt="Chat Support"
+    @click="handleChatClick"
+  />
 </template>
