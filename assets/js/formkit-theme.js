@@ -44,6 +44,10 @@ const rangeClassification = {
   input: "formkit-input-range",
 };
 
+const multiselectClassification = {
+  // No FormKit classes needed - using custom styling
+};
+
 // export our definitions using our above
 // templates and declare one-offs and
 // overrides as needed.
@@ -90,5 +94,9 @@ export default {
     ...textClassification,
     inner: "formkit-inner-dropzone",
     dropzone: "formkit-dropzone",
+  },
+  multiselect: {
+    ...textClassification,
+    ...multiselectClassification,
   },
 };

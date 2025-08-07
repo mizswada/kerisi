@@ -1,0 +1,13 @@
+/* Custom multiselect styling - no FormKit wrapper classes needed */
+
+/* Ensure dropdown is above other elements */
+.relative {
+    position: relative;
+    isolation: isolate;
+  }
+  
+  .relative .absolute {
+    position: absolute !important;
+    z-index: 15 !important;
+    transform: translateZ(0);
+  } 

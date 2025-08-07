@@ -81,7 +81,7 @@ onMounted(() => {
       </div>
 
       <div class="flex gap-2 item-center justify-items-end">
-        <VDropdown placement="bottom-end" distance="13" name="language">
+        <!-- <VDropdown placement="bottom-end" distance="13" name="language">
           <button class="icon-btn h-10 w-10 rounded-full">
             <country-flag :country="languageNow.flagCode" />
           </button>
@@ -196,7 +196,7 @@ onMounted(() => {
               </NuxtScrollbar>
             </ul>
           </template>
-        </VDropdown>
+        </VDropdown> -->
 
         <VDropdown placement="bottom-end" distance="13" name="profile">
           <button class="icon-btn profile px-2">
@@ -208,9 +208,9 @@ onMounted(() => {
               v-if="isDesktop"
               class="grid grid-cols-1 text-left ml-3 flex-none"
             >
-              <p class="font-semibold text-sm truncate w-24 mb-0">John Doe</p>
+              <p class="font-semibold text-sm truncate w-24 mb-0">Muhammad Aqash </p>
               <span class="font-medium text-xs truncate w-24"
-                >RM 10,000.00</span
+                >Staff</span
               >
             </div>
             <Icon name="ic:outline-keyboard-arrow-down" class="ml-3" />

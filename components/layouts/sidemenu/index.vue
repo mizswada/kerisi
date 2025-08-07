@@ -36,7 +36,7 @@ onMounted(() => {
         <div class="flex flex-auto gap-3 justify-center items-center h-[48px]">
           <img
             class="h-10 block"
-            src="@/assets/img/logo/logo-word-black-ui.svg"
+            src="@/assets/img/logo/kerisi_crop.png"
             alt=""
           />
         </div>
