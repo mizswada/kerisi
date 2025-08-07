@@ -66,6 +66,7 @@ const sizeClasses = computed(() => {
     'sm': 'w-12 h-12',
     'md': 'w-14 h-14',
     'lg': 'w-16 h-16',
+    'xl': 'w-[100px] h-[100px]',
   };
   return sizes[props.size] || sizes['md'];
 });
@@ -121,17 +122,13 @@ watch(() => props.show, (newValue) => {
       <!-- Floating Chat Button -->
       <div class="relative w-full h-full">
         <!-- Main Button -->
-        <div class="w-full h-full bg-primary text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
+        <div class="w-full h-full bg-blue-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
           <!-- Image Mode -->
           <img
             v-if="useImage && image"
             :src="image"
             :alt="imageAlt"
-            :class="[
-              'object-contain rounded-full',
-              imageSizeClasses
-            ]"
-            class="p-1"
+            class="w-full h-full object-cover rounded-full"
           />
           <!-- Icon Mode (fallback) -->
           <Icon 
@@ -154,7 +151,7 @@ watch(() => props.show, (newValue) => {
         </div>
         
         <!-- Pulse Animation -->
-        <div class="absolute inset-0 bg-primary rounded-full animate-ping opacity-20"></div>
+        <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20"></div>
       </div>
     </div>
   </Transition>

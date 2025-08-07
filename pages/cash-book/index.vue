@@ -118,7 +118,7 @@
               <Icon name="ic:outline-file-upload" class="mr-2" size="1rem" />
               Normal Upload
             </rs-button>
-            <rs-button type="button" variant="primary" @click="submitForm" :disabled="!isFormValid">
+            <rs-button type="button" variant="primary" @click="submitForm" :disabled="!formData.bankStatementAIFile">
               <Icon name="ic:outline-file-upload" class="mr-2" size="1rem" />
               Upload Statement AI
             </rs-button>

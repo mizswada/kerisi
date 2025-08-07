@@ -62,11 +62,11 @@ const setChatBadge = (count) => {
     :badge="chatBadge"
     badge-color="danger"
     position="bottom-right"
-    size="lg"
-    tooltip="Chat with us"
+    size="xl"
+    tooltip="Chat with Krisi"
     :use-image="true"
-    image="/img/logo_floating.png"
-    image-alt="Chat Support"
+    image="/img/avatar_krisi.PNG"
+    image-alt="Krisi Avatar"
     @click="handleChatClick"
   />
 </template>
