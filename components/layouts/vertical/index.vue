@@ -85,8 +85,8 @@ const setChatBadge = (count) => {
     v-model="showChatModal"
     position="bottom-right"
     size="md"
-    title="KRISI Assistant"
-    assistant-name="KRISI Assistant"
+    title="KERISI Assistant"
+    assistant-name="KERISI Assistant"
     @send-message="handleSendMessage"
   />
 </template>
