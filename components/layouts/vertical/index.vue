@@ -4,6 +4,7 @@ import { useLayoutStore } from "~/stores/layout";
 import RSHeader from "~/components/layouts/Header.vue";
 import RSSideMenu from "~~/components/layouts/sidemenu/index.vue";
 import RsFloatingChat from "~/components/RsFloatingChat.vue";
+import RsChatModal from "~/components/RsChatModal.vue";
 // import RSConfigMenu from "~~/components/layouts/configmenu/index.vue";
 // import RSFooter from "~/components/layouts/Footer.vue";
 import { useWindowSize } from "vue-window-size";
@@ -31,12 +32,21 @@ function toggleMenu(event) {
 // Floating chat functionality
 const showFloatingChat = ref(true);
 const chatBadge = ref(null);
+const showChatModal = ref(false);
 
 const handleChatClick = () => {
-  // Handle chat click - you can open a modal, navigate to chat page, etc.
-  console.log('Floating chat clicked!');
-  // Example: Open chat modal or navigate to chat page
-  // navigateTo('/chat');
+  showChatModal.value = true;
+};
+
+const handleSendMessage = (message) => {
+  // Handle sending message - you can integrate with your API here
+  console.log('Sending message:', message);
+  
+  // Example: You can add API call here to send message to backend
+  // await $fetch('/api/chat', {
+  //   method: 'POST',
+  //   body: { message }
+  // });
 };
 
 // Example: Set badge count (you can fetch this from API)
@@ -58,7 +68,7 @@ const setChatBadge = (count) => {
   
   <!-- Floating Chat -->
   <RsFloatingChat
-    :show="showFloatingChat"
+    :show="showFloatingChat && !showChatModal"
     :badge="chatBadge"
     badge-color="danger"
     position="bottom-right"
@@ -68,5 +78,15 @@ const setChatBadge = (count) => {
     image="/img/avatar_krisi.PNG"
     image-alt="Krisi Avatar"
     @click="handleChatClick"
+  />
+
+  <!-- Chat Modal -->
+  <RsChatModal
+    v-model="showChatModal"
+    position="bottom-right"
+    size="md"
+    title="KRISI Assistant"
+    assistant-name="KRISI Assistant"
+    @send-message="handleSendMessage"
   />
 </template>

@@ -112,7 +112,7 @@ watch(() => props.show, (newValue) => {
     <div
       v-if="isVisible"
       :class="[
-        'fixed z-50 cursor-pointer transition-all duration-300 hover:scale-110',
+        'fixed z-[60] cursor-pointer transition-all duration-300 hover:scale-110',
         positionClasses,
         sizeClasses
       ]"
@@ -122,7 +122,7 @@ watch(() => props.show, (newValue) => {
       <!-- Floating Chat Button -->
       <div class="relative w-full h-full">
         <!-- Main Button -->
-        <div class="w-full h-full bg-blue-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
+                 <div class="w-full h-full bg-[#f1c890] text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
           <!-- Image Mode -->
           <img
             v-if="useImage && image"
@@ -151,7 +151,7 @@ watch(() => props.show, (newValue) => {
         </div>
         
         <!-- Pulse Animation -->
-        <div class="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-20"></div>
+        <div class="absolute inset-0 bg-[#f1c890] rounded-full animate-ping opacity-20"></div>
       </div>
     </div>
   </Transition>
