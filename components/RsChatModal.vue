@@ -14,11 +14,11 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: 'KERISI Assistant',
+    default: 'AINA',
   },
   assistantName: {
     type: String,
-    default: 'KERISI Assistant',
+    default: 'AINA',
   },
 });
 
@@ -29,7 +29,7 @@ const messages = ref([
   {
     id: 1,
     type: 'assistant',
-    content: "Hi! I'm your financial assistant. How can I help you today?",
+    content: "Hai! Saya AINA, Pembantu Kecerdasan Perakaunan & Navigasi anda. Bagaimana saya boleh membantu anda hari ini?",
     timestamp: new Date(),
   },
 
