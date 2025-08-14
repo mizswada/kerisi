@@ -126,7 +126,7 @@ watch(() => props.show, (newValue) => {
           <!-- Image Mode -->
           <img
             v-if="useImage && image"
-            :src="image"
+            src="@/assets/img/avatar_krisi.PNG"
             :alt="imageAlt"
             class="w-full h-full object-cover rounded-full"
           />

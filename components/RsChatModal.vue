@@ -140,7 +140,7 @@ watch(messages, () => {
           <div class="bg-[#f1c890] text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <img 
-                src="/img/avatar_krisi.PNG" 
+                src="@/assets/img/avatar_krisi.png" 
                 alt="KRISI Assistant"
                 class="w-8 h-8 rounded-full"
               />
