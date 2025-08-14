@@ -30,9 +30,44 @@ const messages = ref([
     id: 1,
     type: 'assistant',
     content: "Hai! Saya AINA, Pembantu Kecerdasan Perakaunan & Navigasi anda. Bagaimana saya boleh membantu anda hari ini?",
+    timestamp: new Date(Date.now() - 300000), // 5 minutes ago
+  },
+  {
+    id: 2,
+    type: 'user',
+    content: "Hai AINA! Saya ada soalan tentang penyata kewangan syarikat saya.",
+    timestamp: new Date(Date.now() - 240000), // 4 minutes ago
+  },
+  {
+    id: 3,
+    type: 'assistant',
+    content: "Baik! Saya boleh membantu anda dengan penyata kewangan. Boleh beritahu saya apa yang anda ingin tahu? Adakah tentang penyata pendapatan, kunci kira-kira, atau aliran tunai?",
+    timestamp: new Date(Date.now() - 180000), // 3 minutes ago
+  },
+  {
+    id: 4,
+    type: 'user',
+    content: "Saya nak tahu cara mengira nisbah semasa (current ratio) untuk syarikat saya.",
+    timestamp: new Date(Date.now() - 120000), // 2 minutes ago
+  },
+  {
+    id: 5,
+    type: 'assistant',
+    content: "Bagus! Nisbah semasa dikira dengan membahagikan aset semasa dengan liabiliti semasa. Formula: Current Ratio = Aset Semasa ÷ Liabiliti Semasa. Nisbah 2:1 atau lebih tinggi biasanya dianggap sihat. Boleh beritahu saya nilai aset semasa dan liabiliti semasa syarikat anda?",
+    timestamp: new Date(Date.now() - 60000), // 1 minute ago
+  },
+  {
+    id: 6,
+    type: 'user',
+    content: "Aset semasa RM150,000, liabiliti semasa RM75,000. Boleh kira untuk saya?",
+    timestamp: new Date(Date.now() - 30000), // 30 seconds ago
+  },
+  {
+    id: 7,
+    type: 'assistant',
+    content: "Tentu! Dengan aset semasa RM150,000 dan liabiliti semasa RM75,000, nisbah semasa anda adalah: 150,000 ÷ 75,000 = 2.0. Ini adalah nisbah yang sangat baik! Ia menunjukkan syarikat anda mempunyai keupayaan yang kuat untuk membayar obligasi jangka pendek. Adakah anda ingin saya terangkan tentang nisbah kewangan lain juga?",
     timestamp: new Date(),
   },
-
 ]);
 
 const newMessage = ref('');

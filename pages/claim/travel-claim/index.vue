@@ -43,7 +43,7 @@
                     type="text"
                     label="Staff No"
                     v-model="formData.staffNo"
-                    value="-1"
+                    value="42"
                     readonly
                     :classes="{
                     input: 'bg-gray-100 cursor-not-allowed'
@@ -300,7 +300,7 @@
           />
           
           <FormKit
-            type="datetime-local"
+            type="date"
             name="dateFrom"
             label="Date From"
             v-model="newClaimItem.dateFrom"
@@ -308,7 +308,7 @@
           />
           
           <FormKit
-            type="datetime-local"
+            type="date"
             name="dateTo"
             label="Date To"
             v-model="newClaimItem.dateTo"
@@ -384,13 +384,13 @@ const { $swal } = useNuxtApp();
 
 // Form data
 const formData = ref({
-  staffName: "SYSTEM ADMIN",
-  staffNo: "-1",
-  staffPtj: "",
+  staffName: "Aizal Manan",
+  staffNo: "42",
+  staffPtj: "Marketing Department",
   transportRegNo: "KCF966",
   claimMonth: "June",
   claimYear: "2025",
-  applicationNo: "",
+  applicationNo: "CLAIM-2025-06",
   applicationStatus: "DRAFT",
   billNo: "",
   journalNo: ""
@@ -594,30 +594,31 @@ const submitAIClaimItem = async () => {
       // Generate different types of items for each file
       if (i % 3 === 0) {
         aiGeneratedItems.push({
-          dateFrom: `2025-01-${15 + i}T09:00`,
-          dateTo: `2025-01-${15 + i}T17:00`,
+          dateFrom: `2025-06-07`,
+          dateTo: `2025-06-07`,
           item: "Travel",
           description: `Business trip - AI extracted from file ${fileIndex}`,
           mileage: "150",
-          amount: (75.50 + (i * 10)).toFixed(2)
+          amount: (65.81).toFixed(2)
         });
       } else if (i % 3 === 1) {
         aiGeneratedItems.push({
-          dateFrom: `2025-01-${15 + i}T12:00`,
-          dateTo: `2025-01-${15 + i}T13:00`,
-          item: "Meals",
-          description: `Meal expense - AI extracted from file ${fileIndex}`,
-          mileage: "0",
-          amount: (25.00 + (i * 5)).toFixed(2)
-        });
-      } else {
-        aiGeneratedItems.push({
-          dateFrom: `2025-01-${15 + i}T08:00`,
-          dateTo: `2025-01-${15 + i}T18:00`,
+          dateFrom: `2025-06-07`,
+          dateTo: `2025-06-08`,
           item: "Accommodation",
           description: `Hotel stay - AI extracted from file ${fileIndex}`,
           mileage: "0",
-          amount: (120.00 + (i * 15)).toFixed(2)
+          amount: (85.91).toFixed(2)
+        });
+        
+      } else {
+        aiGeneratedItems.push({
+          dateFrom: `2025-06-07`,
+          dateTo: `2025-06-07`,
+          item: "Meals",
+          description: `Meal expense - AI extracted from file ${fileIndex}`,
+          mileage: "0",
+          amount: (25.00).toFixed(2)
         });
       }
     }
