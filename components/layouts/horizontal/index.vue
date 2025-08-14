@@ -59,7 +59,7 @@ const setChatBadge = (count) => {
     size="xl"
     tooltip="Chat with Krisi"
     :use-image="true"
-    image="/img/avatar_krisi.PNG"
+    image="@/assets/img/avatar_krisi.png"
     image-alt="Krisi Avatar"
     @click="handleChatClick"
   />
