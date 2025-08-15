@@ -122,7 +122,7 @@ watch(() => props.show, (newValue) => {
       <!-- Floating Chat Button -->
       <div class="relative w-full h-full">
         <!-- Main Button -->
-                 <div class="w-full h-full bg-[#f1c890] text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
+                 <div class="w-full h-full bg-[#f5d142] text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 overflow-hidden">
           <!-- Image Mode -->
           <img
             v-if="useImage && image"

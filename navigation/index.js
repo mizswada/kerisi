@@ -2,8 +2,8 @@ export default [
   // {
   //   child: [
   //     {
-  //       title: "Dashboard",
-  //       path: "/dashboard",
+  //       title: "Test",
+  //       path: "/test",
   //       icon: "ic:outline-dashboard",
   //       child: [],
   //     },

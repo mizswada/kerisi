@@ -172,7 +172,7 @@ watch(messages, () => {
           ]"
         >
           <!-- Header -->
-          <div class="bg-[#f1c890] text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+          <div class="bg-[#f5d142] text-black px-4 py-3 rounded-t-lg flex items-center justify-between">
             <div class="flex items-center space-x-2">
               <img 
                 src="@/assets/img/avatar_krisi.png" 
@@ -183,7 +183,7 @@ watch(messages, () => {
             </div>
             <button
               @click="closeModal"
-              class="text-white hover:text-gray-200 transition-colors"
+              class="text-black hover:text-gray-200 transition-colors"
             >
               <Icon name="ic:round-close" size="20" />
             </button>
@@ -208,15 +208,15 @@ watch(messages, () => {
                    :class="[
                      'max-w-[80%] px-3 py-2 rounded-lg',
                      message.type === 'user' 
-                       ? 'bg-[#f1c890] text-white' 
-                       : 'bg-gray-200 text-gray-800'
+                       ? 'bg-[#f5d142] text-black' 
+                       : 'bg-gray-200 text-black'
                    ]"
                  >
                   <p class="text-sm">{{ message.content }}</p>
                                      <p 
                      :class="[
                        'text-xs mt-1',
-                       message.type === 'user' ? 'text-[#f1c890]/80' : 'text-gray-500'
+                       message.type === 'user' ? 'text-[#f5d142]/80' : 'text-gray-500'
                      ]"
                    >
                     {{ new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
@@ -234,12 +234,12 @@ watch(messages, () => {
                  @keypress="handleKeyPress"
                  type="text"
                  placeholder="Type your question here..."
-                 class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f1c890] focus:border-transparent"
+                 class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f5d142] focus:border-transparent"
                />
                <button
                  @click="sendMessage"
                  :disabled="!newMessage.trim()"
-                 class="px-4 py-2 bg-[#f1c890] text-white rounded-lg hover:bg-[#e6b880] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                 class="px-4 py-2 bg-[#f5d142] text-black rounded-lg hover:bg-[#e6c23a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                >
                 Send
               </button>
