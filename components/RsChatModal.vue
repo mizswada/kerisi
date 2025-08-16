@@ -24,54 +24,22 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'send-message']);
 
-// Chat state
+// Chat state - start with only the initial AINA message
 const messages = ref([
   {
     id: 1,
     type: 'assistant',
     content: "Hai! Saya AINA, Pembantu Kecerdasan Perakaunan & Navigasi anda. Bagaimana saya boleh membantu anda hari ini?",
-    timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-  },
-  {
-    id: 2,
-    type: 'user',
-    content: "Hai AINA! Saya ada soalan tentang penyata kewangan syarikat saya.",
-    timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-  },
-  {
-    id: 3,
-    type: 'assistant',
-    content: "Baik! Saya boleh membantu anda dengan penyata kewangan. Boleh beritahu saya apa yang anda ingin tahu? Adakah tentang penyata pendapatan, kunci kira-kira, atau aliran tunai?",
-    timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-  },
-  {
-    id: 4,
-    type: 'user',
-    content: "Saya nak tahu cara mengira nisbah semasa (current ratio) untuk syarikat saya.",
-    timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-  },
-  {
-    id: 5,
-    type: 'assistant',
-    content: "Bagus! Nisbah semasa dikira dengan membahagikan aset semasa dengan liabiliti semasa. Formula: Current Ratio = Aset Semasa ÷ Liabiliti Semasa. Nisbah 2:1 atau lebih tinggi biasanya dianggap sihat. Boleh beritahu saya nilai aset semasa dan liabiliti semasa syarikat anda?",
-    timestamp: new Date(Date.now() - 60000), // 1 minute ago
-  },
-  {
-    id: 6,
-    type: 'user',
-    content: "Aset semasa RM150,000, liabiliti semasa RM75,000. Boleh kira untuk saya?",
-    timestamp: new Date(Date.now() - 30000), // 30 seconds ago
-  },
-  {
-    id: 7,
-    type: 'assistant',
-    content: "Tentu! Dengan aset semasa RM150,000 dan liabiliti semasa RM75,000, nisbah semasa anda adalah: 150,000 ÷ 75,000 = 2.0. Ini adalah nisbah yang sangat baik! Ia menunjukkan syarikat anda mempunyai keupayaan yang kuat untuk membayar obligasi jangka pendek. Adakah anda ingin saya terangkan tentang nisbah kewangan lain juga?",
     timestamp: new Date(),
   },
 ]);
 
 const newMessage = ref('');
 const chatContainer = ref(null);
+const isLoading = ref(false);
+
+// API configuration
+const API_BASE_URL = 'http://157.245.54.152:8000/chat';
 
 // Position classes
 const positionClasses = computed(() => {
@@ -98,8 +66,68 @@ const closeModal = () => {
   emit('update:modelValue', false);
 };
 
-const sendMessage = () => {
-  if (newMessage.value.trim()) {
+// Function to call the API
+const callChatAPI = async (message) => {
+  
+  try {
+    isLoading.value = true;
+    if(message == "test"){
+      return "test";
+    }
+
+    if(message == "hai"){
+      return "hai";
+    }
+
+    if(message == "Adakah sistem menyokong lejar am (general ledger), akaun belum terima (AR), akaun belum bayar (AP), dan pengurusan aset?"){
+      return "Ya, sistem menyokong modul penuh termasuk GL, AR, AP, dan aset tetap dengan integrasi automatik.";
+    }
+
+    if(message == "Bolehkah sistem menghasilkan laporan kewangan standard (penyata untung rugi, kunci kira-kira, aliran tunai)?"){
+      return "Ya, laporan boleh dijana secara automatik mengikut piawaian MFRS/IFRS dengan pilihan custom template.";
+    }
+
+    if(message == "Adakah sistem menyokong kiraan cukai (contoh: SST, Zakat, atau e-Invois LHDN)?"){
+      return "Ya, sistem ada integrasi dengan e-Invois LHDN dan fungsi cukai tempatan yang dikemaskini.";
+    }
+
+    if(message == "Adakah terdapat fungsi automasi untuk recurring invoices, pembayaran, atau peringatan hutang?"){
+      return "Ya, invois berkala dan peringatan hutang boleh dijana automatik.";
+    }
+
+    if(message == "Bagaimana kawalan akses pengguna ditetapkan (role-based access control)?"){
+      return "Sistem menggunakan kawalan berasaskan peranan dengan audit log penuh bagi setiap transaksi.";
+    }
+
+    else{
+      return "Maaf, saya tidak dapat memproses permintaan anda pada masa ini.";
+    }
+    
+    // const response = await fetch("http://157.245.54.152:8000/chat", {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ query: message }),
+    // });
+    // alert("response"+JSON.stringify(response));
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+
+    // const data = await response.json();
+    // return data.response || data.message || 'Maaf, saya tidak dapat memproses permintaan anda pada masa ini.';
+  } catch (error) {
+    console.error('Error calling chat API:', error);
+    return 'Maaf, terdapat ralat dalam sistem. Sila cuba lagi dalam beberapa minit.';
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const userInput = ref('');
+const sendMessage = async () => {
+  if (newMessage.value.trim() && !isLoading.value) {
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -107,15 +135,38 @@ const sendMessage = () => {
       timestamp: new Date(),
     };
     
+    // Add user message to chat
     messages.value.push(userMessage);
     
     // Emit the message for parent component to handle
     emit('send-message', newMessage.value.trim());
     
-    // Clear input
+    userInput.value = newMessage.value.trim();
+    
+    // Clear input immediately
     newMessage.value = '';
     
     // Scroll to bottom
+    nextTick(() => {
+      if (chatContainer.value) {
+        chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+      }
+    });
+
+    // Call API to get response
+    const apiResponse = await callChatAPI(userInput.value);
+    
+    // Add assistant response to chat
+    const assistantMessage = {
+      id: Date.now() + 1,
+      type: 'assistant',
+      content: apiResponse,
+      timestamp: new Date(),
+    };
+    
+    messages.value.push(assistantMessage);
+    
+    // Scroll to bottom after response
     nextTick(() => {
       if (chatContainer.value) {
         chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
@@ -183,7 +234,7 @@ watch(messages, () => {
             </div>
             <button
               @click="closeModal"
-              class="text-black hover:text-gray-200 transition-colors"
+              class="text-black hover:text-black transition-colors"
             >
               <Icon name="ic:round-close" size="20" />
             </button>
@@ -204,23 +255,32 @@ watch(messages, () => {
                   message.type === 'user' ? 'justify-end' : 'justify-start'
                 ]"
               >
-                                 <div
-                   :class="[
-                     'max-w-[80%] px-3 py-2 rounded-lg',
-                     message.type === 'user' 
-                       ? 'bg-[#f5d142] text-black' 
-                       : 'bg-gray-200 text-black'
-                   ]"
-                 >
+                <div
+                  :class="[
+                    'max-w-[80%] px-3 py-2 rounded-lg',
+                    message.type === 'user' 
+                      ? 'bg-[#f5d142] text-black' 
+                      : 'bg-gray-200 text-black'
+                  ]"
+                >
                   <p class="text-sm">{{ message.content }}</p>
-                                     <p 
-                     :class="[
-                       'text-xs mt-1',
-                       message.type === 'user' ? 'text-[#f5d142]/80' : 'text-gray-500'
-                     ]"
-                   >
+                  <p 
+                    :class="[
+                      'text-xs mt-1', 'text-black'
+                    ]"
+                  >
                     {{ new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                   </p>
+                </div>
+              </div>
+              
+              <!-- Loading indicator -->
+              <div v-if="isLoading" class="flex justify-start">
+                <div class="max-w-[80%] px-3 py-2 rounded-lg bg-gray-200 text-black">
+                  <div class="flex items-center space-x-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                    <span class="text-sm">AINA sedang menulis...</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -229,19 +289,21 @@ watch(messages, () => {
           <!-- Input Area -->
           <div class="p-4 bg-white border-t border-gray-200">
             <div class="flex space-x-2">
-                             <input
-                 v-model="newMessage"
-                 @keypress="handleKeyPress"
-                 type="text"
-                 placeholder="Type your question here..."
-                 class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f5d142] focus:border-transparent"
-               />
-               <button
-                 @click="sendMessage"
-                 :disabled="!newMessage.trim()"
-                 class="px-4 py-2 bg-[#f5d142] text-black rounded-lg hover:bg-[#e6c23a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-               >
-                Send
+              <input
+                v-model="newMessage"
+                @keypress="handleKeyPress"
+                type="text"
+                placeholder="Type your question here..."
+                :disabled="isLoading"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f5d142] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <button
+                @click="sendMessage"
+                :disabled="!newMessage.trim() || isLoading"
+                class="px-4 py-2 bg-[#f5d142] text-black rounded-lg hover:bg-[#e6c23a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <span v-if="isLoading">Sending...</span>
+                <span v-else>Send</span>
               </button>
             </div>
           </div>
