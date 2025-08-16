@@ -5,7 +5,13 @@ export default [
   //       title: "Test",
   //       path: "/test",
   //       icon: "ic:outline-dashboard",
-  //       child: [],
+  //       child: [
+  //         {
+  //           title: "Chat API Test",
+  //           path: "/test/chat-api-test",
+  //           icon: "ic:outline-chat",
+  //         },
+  //       ],
   //     },
   //   ],
   // },
