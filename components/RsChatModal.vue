@@ -191,10 +191,10 @@ const callChatAPI = async (message) => {
     });
 
     const data = await response.json();
-    return data.answer || data.response || data.message || 'Maaf, saya tidak dapat memproses permintaan anda pada masa ini.';
+    return data.answer || data.response || data.message || 'Sorry, I cannot process your request at the moment.';
   } catch (error) {
     console.error('Error calling chat API:', error);
-    return 'Maaf, terdapat ralat dalam sistem. Sila cuba lagi dalam beberapa minit.';
+    return 'Sorry, I cannot process your request at the moment.';
   } finally {
     isLoading.value = false;
   }
