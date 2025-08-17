@@ -536,7 +536,7 @@ const callChatAPI = async (message) => {
         // Store this status for consistency
         documentStatusMap.value.set(randomPO, { type: 'po', status: randomStatus });
         
-        return `I couldn't find a specific PO number in your message. Here's a sample PO: PO123456789/PRO123456789 `;
+        return `I couldn't find a specific PO number in your message. Here's a sample PO: PO123456789`;
       }
     }
 
