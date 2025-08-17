@@ -43,9 +43,6 @@ const isLoading = ref(false);
 const showMetadataModal = ref(false);
 const metadataDetails = ref(null);
 
-// Status mapping to store document statuses from status messages
-const documentStatusMap = ref(new Map());
-
 // API configuration
 const API_BASE_URL = 'http://157.245.54.152:8000/chat';
 
@@ -107,61 +104,8 @@ const generateRandomBillNumbers = (count = 5) => {
   return uniqueBills;
 };
 
-// Function to generate random PO numbers
-const generateRandomPONumbers = (count = 5) => {
-  const pos = [];
-  for (let i = 0; i < count; i++) {
-    let poNumber;
-    
-    // Randomly choose between PRO***/**** and PO******** formats
-    if (Math.random() > 0.5) {
-      // Generate PRO***/**** format
-      const randomNum = Math.floor(Math.random() * 900) + 100; // 100-999
-      const year = '24';
-      const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-      poNumber = `PRO${randomNum}/${year}${month}`;
-    } else {
-      // Generate PO******** format (like PO230500148)
-      const year = '23'; // 2023
-      const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-      const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0');
-      const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-      poNumber = `PO${year}${month}${day}${sequence}`;
-    }
-    
-    pos.push(poNumber);
-  }
-  
-  // Ensure we have at least 2 unique POs
-  const uniquePOs = [...new Set(pos)];
-  if (uniquePOs.length < 2) {
-    // Add more POs if we don't have enough unique ones
-    while (uniquePOs.length < 2) {
-      let poNumber;
-      if (Math.random() > 0.5) {
-        const randomNum = Math.floor(Math.random() * 900) + 100;
-        const year = '24';
-        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-        poNumber = `PRO${randomNum}/${year}${month}`;
-      } else {
-        const year = '23';
-        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-        const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0');
-        const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-        poNumber = `PO${year}${month}${day}${sequence}`;
-      }
-      
-      if (!uniquePOs.includes(poNumber)) {
-        uniquePOs.push(poNumber);
-      }
-    }
-  }
-  
-  return uniquePOs;
-};
-
 // Function to generate realistic bill details
-const generateBillDetails = (billNumber, status = null) => {
+const generateBillDetails = (billNumber) => {
   // Extract month and year from bill number (APN000369/2402 -> month: 02, year: 24)
   const parts = billNumber.split('/');
   const monthYear = parts[1];
@@ -197,8 +141,9 @@ const generateBillDetails = (billNumber, status = null) => {
   
   const description = descriptions[Math.floor(Math.random() * descriptions.length)];
   
-  // Use provided status or generate random one
-  const finalStatus = status || ["APPROVE", "PENDING", "REJECT", "DRAFT"][Math.floor(Math.random() * 4)];
+  // Status options
+  const statuses = ["APPROVE", "PENDING", "REJECT", "DRAFT"];
+  const status = statuses[Math.floor(Math.random() * statuses.length)];
   
   return {
     "Approve Date": approveDate,
@@ -210,61 +155,7 @@ const generateBillDetails = (billNumber, status = null) => {
     "Invoice Date": invoiceDate,
     "Amount": amount,
     "Balance": balance,
-    "Status": finalStatus
-  };
-};
-
-// Function to generate realistic PO details
-const generatePODetails = (poNumber, status = null) => {
-  let month, year, day;
-  
-  // Check if it's PRO***/**** format or PO******** format
-  if (poNumber.includes('/')) {
-    // PRO***/**** format (e.g., PRO097/2408)
-    const parts = poNumber.split('/');
-    const monthYear = parts[1];
-    month = monthYear.substring(2, 4); // Get month (08)
-    year = monthYear.substring(0, 2); // Get year (24)
-    day = Math.floor(Math.random() * 28) + 1; // Random day 1-28
-  } else {
-    // PO******** format (e.g., PO230500148)
-    month = poNumber.substring(4, 6); // Get month (05)
-    year = poNumber.substring(2, 4); // Get year (23)
-    day = poNumber.substring(6, 8); // Get day (00)
-  }
-  
-  // Generate random amounts between 1000 and 100000
-  const amount = (Math.random() * 99000 + 1000).toFixed(1);
-  
-  // Generate random dates based on the month/year from PO number
-  const approveDate = `${day.toString().padStart(2, '0')}/${month}/${year}`;
-  
-  // Sample descriptions for different types of services
-  const descriptions = [
-    "PERUBAHAN SISTEM APLIKASI",
-    "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
-    "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
-    "PEMBANGUNAN SISTEM APLIKASI BARU",
-    "PENYELENGGARAAN SISTEM IT",
-    "UPGRADE SISTEM KEWANGAN",
-    "PERUBAHAN INFRASTRUKTUR IT",
-    "PEMBAHARUAN SISTEM DATABASE",
-    "PEMASANGAN PERALATAN IT",
-    "KONSULTASI SISTEM KEWANGAN"
-  ];
-  
-  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
-  
-  // Use provided status or generate random one
-  // const finalStatus = status || ["APPROVE", "PENDING", "REJECT", "DRAFT"][Math.floor(Math.random() * 4)];
-  const finalStatus = status || ["APPROVE"][Math.floor(Math.random() * 4)];
-  
-  return {
-    "Date": approveDate,
-    "PO Number": poNumber,
-    "Description": description,
-    "Amount": amount,
-    "Status": "APPROVE"
+    "Status": status
   };
 };
 
@@ -306,6 +197,7 @@ const showMetadataModalData = (data) => {
     };
 
     metadataDetails.value = `
+      <h3 class="text-lg font-semibold mb-3">Document Details</h3>
       <table class="w-full border-collapse">
         ${Object.entries(data).map(([k, v]) =>
           `<tr><td class="font-bold p-2 border-b border-gray-200">${k}</td><td class="p-2 border-b border-gray-200">${formatValue(k, v)}</td></tr>`
@@ -319,20 +211,10 @@ const showMetadataModalData = (data) => {
 // Function to fetch and show metadata
 const fetchAndShowMetadata = async (type, id) => {
   try {
-    // Check if we have a stored status for this document
-    const storedStatus = documentStatusMap.value.get(id);
-    
     // For bill type, generate realistic details
     if (type === 'bill') {
-      const billDetails = generateBillDetails(id, storedStatus?.status);
+      const billDetails = generateBillDetails(id);
       showMetadataModalData(billDetails);
-      return;
-    }
-    
-    // For PO type, generate realistic details
-    if (type === 'po') {
-      const poDetails = generatePODetails(id, storedStatus?.status);
-      showMetadataModalData(poDetails);
       return;
     }
     
@@ -342,7 +224,16 @@ const fetchAndShowMetadata = async (type, id) => {
     showMetadataModalData(data);
   } catch (error) {
     // If API fails, generate mock data for other types too
-    if (type === 'voucher') {
+    if (type === 'po') {
+      const poDetails = {
+        "PO Number": id,
+        "Date": new Date().toLocaleDateString('en-GB'),
+        "Supplier": "Sample Supplier Sdn Bhd",
+        "Amount": (Math.random() * 100000 + 1000).toFixed(2),
+        "Status": "APPROVED"
+      };
+      showMetadataModalData(poDetails);
+    } else if (type === 'voucher') {
       const voucherDetails = {
         "Voucher No": id,
         "Date": new Date().toLocaleDateString('en-GB'),
@@ -406,135 +297,31 @@ const callChatAPI = async (message) => {
       return "Hi, I'm AINA, your Accounting & Navigation Intelligence Assistant. How can I help you today?";
     }
 
-    // if(message === "Does the system support general ledger, accounts receivable (AR), accounts payable (AP), and asset management?"){
-    //   return "Yes, the system supports full modules including GL, AR, AP, and fixed asset management with automatic integration.";
-    // }
+    if(message === "Does the system support general ledger, accounts receivable (AR), accounts payable (AP), and asset management?"){
+      return "Yes, the system supports full modules including GL, AR, AP, and fixed asset management with automatic integration.";
+    }
 
-    // if(message === "Can the system generate financial reports (profit and loss statement, balance sheet, cash flow)?"){
-    //   return "Yes, financial reports can be generated automatically according to MFRS/IFRS standards with customizable templates.";
-    // }
+    if(message === "Can the system generate financial reports (profit and loss statement, balance sheet, cash flow)?"){
+      return "Yes, financial reports can be generated automatically according to MFRS/IFRS standards with customizable templates.";
+    }
 
-    // if(message === "Does the system support tax accounting (e.g., SST, Zakat, or e-Invois LHDN)?"){
-    //   return "Yes, the system has integration with e-Invois LHDN and local tax functions.";
-    // }
+    if(message === "Does the system support tax accounting (e.g., SST, Zakat, or e-Invois LHDN)?"){
+      return "Yes, the system has integration with e-Invois LHDN and local tax functions.";
+    }
 
-    // if(message === "Does the system have automation for recurring invoices, payments, or debt reminders?"){
-    //   return "Yes, recurring invoices and debt reminders can be generated automatically.";
-    // }
+    if(message === "Does the system have automation for recurring invoices, payments, or debt reminders?"){
+      return "Yes, recurring invoices and debt reminders can be generated automatically.";
+    }
 
-    // if(message === "How is user access control set up (role-based access control)?"){
-    //   return "The system uses role-based access control with full audit logs for every transaction.";
-    // }
+    if(message === "How is user access control set up (role-based access control)?"){
+      return "The system uses role-based access control with full audit logs for every transaction.";
+    }
 
     // Check if message contains "bill numbers"
     if(message.toLowerCase().includes("bill numbers") || message.toLowerCase().includes("bill no")){
       const randomBills = generateRandomBillNumbers(5);
       return `${randomBills.join('\n')}
-
-If you need details about any bill, just click on its Bill No.`;
-    }
-
-    // Check if message contains "po no" or "PO no"
-    if(message.toLowerCase().includes("po no") || message.toLowerCase().includes("po numbers")){
-      const randomPOS = generateRandomPONumbers(5);
-      return `Here are the PO Numbers with status APPROVE (acceptable):
-
-
-
-${randomPOS.map(po => {
-  const descriptions = [
-    "PERUBAHAN SISTEM APLIKASI",
-    "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
-    "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS",
-    "PEMBANGUNAN SISTEM APLIKASI BARU",
-    "PENYELENGGARAAN SISTEM IT",
-    "UPGRADE SISTEM KEWANGAN",
-    "PERUBAHAN INFRASTRUKTUR IT",
-    "PEMBAHARUAN SISTEM DATABASE"
-  ];
-  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
-  const amount = (Math.random() * 100000 + 1000).toFixed(1);
-  return `${po}, Description: ${description}, Amount: ${parseFloat(amount).toLocaleString('en-MY')}`;
-}).join('\n\n')}
-
-
-All listed PO Numbers are acceptable as their status is APPROVE.
-
-If you need details about any PO, just click on its PO No.`;
-    }
-
-    // Check if message contains "status"
-    if(message.toLowerCase().includes("status")){
-      // Generate a mix of documents with different statuses
-      const documents = [];
-      
-      // Clear previous status mapping
-      documentStatusMap.value.clear();
-      
-      // Generate 2-3 bills with different statuses
-      const billStatuses = ["APPROVE", "PENDING", "REJECT"];
-      for (let i = 0; i < 3; i++) {
-        const randomNum = Math.floor(Math.random() * 900) + 100;
-        const year = '24';
-        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-        const billNumber = `APN000${randomNum}/${year}${month}`;
-        const status = billStatuses[i];
-        const amount = (Math.random() * 49000 + 1000).toFixed(2);
-        
-        // Store the status mapping for this bill
-        documentStatusMap.value.set(billNumber, { type: 'bill', status: status });
-        
-        documents.push({
-          type: "Bill",
-          number: billNumber,
-          status: status,
-          amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          description: "PERKHIDMATAN SISTEM IT"
-        });
-      }
-      
-      // Generate 2-3 POs with different statuses
-      const poStatuses = ["APPROVE", "DRAFT", "PENDING"];
-      for (let i = 0; i < 3; i++) {
-        let poNumber;
-        if (Math.random() > 0.5) {
-          const randomNum = Math.floor(Math.random() * 900) + 100;
-          const year = '24';
-          const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-          poNumber = `PRO${randomNum}/${year}${month}`;
-        } else {
-          const year = '23';
-          const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-          const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0');
-          const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-          poNumber = `PO${year}${month}${day}${sequence}`;
-        }
-        
-        const status = poStatuses[i];
-        const amount = (Math.random() * 99000 + 1000).toFixed(1);
-        
-        // Store the status mapping for this PO
-        documentStatusMap.value.set(poNumber, { type: 'po', status: status });
-        
-        documents.push({
-          type: "PO",
-          number: poNumber,
-          status: status,
-          amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
-          description: "PERUBAHAN SISTEM APLIKASI"
-        });
-      }
-      
-      return `Here are documents with their current statuses:
-
-${documents.map(doc => 
-  `${doc.type}: ${doc.number}
-Status: **${doc.status}**
-Amount: ${doc.amount}
-Description: ${doc.description}`
-).join('\n\n')}
-
-Click on any document number to view complete details including the status shown above.`;
+            If you need details about any bill, just click on its Bill No.`;
     }
 
     // // Call the actual API for other queries
@@ -571,11 +358,6 @@ const sendMessage = async () => {
       content: newMessage.value.trim(),
       timestamp: new Date(),
     };
-    
-    // Clear status mapping for new conversation
-    if (!userMessage.content.toLowerCase().includes('status')) {
-      documentStatusMap.value.clear();
-    }
     
     // Add user message to chat
     messages.value.push(userMessage);
@@ -805,7 +587,7 @@ const closeMetadataModal = () => {
         @click.stop
       >
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Details</h2>
+          <h2 class="text-xl font-bold">Document Details</h2>
           <button 
             @click="closeMetadataModal"
             class="text-gray-500 hover:text-gray-700"

@@ -1,6 +1,6 @@
 <script setup>
 useHead({
-  title: "corradUI - NuxtJS Admin Dashboard Template",
+  title: "Kerisi - AI Assistant",
   description: "Home page",
   htmlAttrs: {
     lang: "en",
