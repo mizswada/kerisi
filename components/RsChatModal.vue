@@ -214,77 +214,123 @@ const generateBillDetails = (billNumber, status = null) => {
   };
 };
 
-// Function to generate realistic PO details
-const generatePODetails = (poNumber, status = null) => {
-  let month, year, day;
-  
-  // Check if it's PRO***/**** format or PO******** format
-  if (poNumber.includes('/')) {
-    // PRO***/**** format (e.g., PRO097/2408)
-    const parts = poNumber.split('/');
-    const monthYear = parts[1];
-    month = monthYear.substring(2, 4); // Get month (08)
-    year = monthYear.substring(0, 2); // Get year (24)
-    day = Math.floor(Math.random() * 28) + 1; // Random day 1-28
-  } else {
-    // PO******** format (e.g., PO230500148)
-    month = poNumber.substring(4, 6); // Get month (05)
-    year = poNumber.substring(2, 4); // Get year (23)
-    day = poNumber.substring(6, 8); // Get day (00)
-  }
-  
-  // Generate random amounts between 1000 and 100000
-  const amount = (Math.random() * 99000 + 1000).toFixed(1);
-  
-  // Generate random dates based on the month/year from PO number
-  const approveDate = `${day.toString().padStart(2, '0')}/${month}/${year}`;
-  
-  // Sample descriptions for different types of services
-  const descriptions = [
-    "PERUBAHAN SISTEM APLIKASI",
-    "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
-    "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
-    "PEMBANGUNAN SISTEM APLIKASI BARU",
-    "PENYELENGGARAAN SISTEM IT",
-    "UPGRADE SISTEM KEWANGAN",
-    "PERUBAHAN INFRASTRUKTUR IT",
-    "PEMBAHARUAN SISTEM DATABASE",
-    "PEMASANGAN PERALATAN IT",
-    "KONSULTASI SISTEM KEWANGAN"
-  ];
-  
-  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
-  
-  // Use provided status or generate random one
-  // const finalStatus = status || ["APPROVE", "PENDING", "REJECT", "DRAFT"][Math.floor(Math.random() * 4)];
-  const finalStatus = status || ["APPROVE"][Math.floor(Math.random() * 4)];
-  
-  return {
-    "Date": approveDate,
-    "PO Number": poNumber,
-    "Description": description,
-    "Amount": amount,
-    "Status": "APPROVE"
-  };
-};
+ // Function to generate realistic PO details
+ const generatePODetails = (poNumber, status = null) => {
+   let month, year, day;
+   
+   // Check if it's PRO***/**** format or PO******** format
+   if (poNumber.includes('/')) {
+     // PRO***/**** format (e.g., PRO097/2408)
+     const parts = poNumber.split('/');
+     const monthYear = parts[1];
+     month = monthYear.substring(2, 4); // Get month (08)
+     year = monthYear.substring(0, 2); // Get year (24)
+     day = Math.floor(Math.random() * 28) + 1; // Random day 1-28
+   } else {
+     // PO******** format (e.g., PO230500148)
+     month = poNumber.substring(4, 6); // Get month (05)
+     year = poNumber.substring(2, 4); // Get year (23)
+     day = poNumber.substring(6, 8); // Get day (00)
+   }
+   
+   // Generate random amounts between 1000 and 100000
+   const amount = (Math.random() * 99000 + 1000).toFixed(1);
+   
+   // Generate random dates based on the month/year from PO number
+   const approveDate = `${day.toString().padStart(2, '0')}/${month}/${year}`;
+   
+   // Sample descriptions for different types of services
+   const descriptions = [
+     "PERUBAHAN SISTEM APLIKASI",
+     "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+     "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
+     "PEMBANGUNAN SISTEM APLIKASI BARU",
+     "PENYELENGGARAAN SISTEM IT",
+     "UPGRADE SISTEM KEWANGAN",
+     "PERUBAHAN INFRASTRUKTUR IT",
+     "PEMBAHARUAN SISTEM DATABASE",
+     "PEMASANGAN PERALATAN IT",
+     "KONSULTASI SISTEM KEWANGAN"
+   ];
+   
+   const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+   
+   // Use provided status or default to APPROVE
+   const finalStatus = status || "APPROVE";
+   
+   return {
+     "Date": approveDate,
+     "PO Number": poNumber,
+     "Description": description,
+     "Amount": amount,
+     "Status": finalStatus
+   };
+ };
 
-// Function to linkify IDs in HTML content
-const linkifyIDs = (html) => {
-  // Regex patterns for each type (adjust as needed)
-  const patterns = [
-    { type: 'po', regex: /(PO\d{6,}|PRO\d{3}\/\d{4})/g },
-    { type: 'bill', regex: /(APN\d{6}\/\d{4}|IR\d{9,})/g },
-    { type: 'voucher', regex: /(VCR\d{6,}\/\d{4})/g },
-    { type: 'payment', regex: /(EFT\d{5,}\/\d{4})/g }
-  ];
-  
-  patterns.forEach(({type, regex}) => {
-    html = html.replace(regex, match =>
-      `<span class="id-link cursor-pointer text-blue-600 hover:text-blue-800 underline" data-type="${type}" data-id="${match}">${match}</span>`
-    );
-  });
-  return html;
-};
+ // Function to generate realistic invoice details
+ const generateInvoiceDetails = (invoiceNumber) => {
+   // Extract month and year from invoice number (INV0124001 -> month: 01, year: 24)
+   const month = invoiceNumber.substring(3, 5); // Get month (01)
+   const year = invoiceNumber.substring(5, 7); // Get year (24)
+   
+   // Generate random day
+   const day = Math.floor(Math.random() * 28) + 1;
+   const invoiceDate = `${day.toString().padStart(2, '0')}/${month}/${year}`;
+   
+   // Generate random amounts between 1000 and 50000
+   const amount = (Math.random() * 49000 + 1000).toFixed(2);
+   const taxAmount = (parseFloat(amount) * 0.06).toFixed(2); // 6% SST
+   const totalAmount = (parseFloat(amount) + parseFloat(taxAmount)).toFixed(2);
+   
+   // Generate related numbers
+   const poNumber = `PO${year}${month}${String(Math.floor(Math.random() * 31) + 1).padStart(2, '0')}${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+   const customerRef = `CUST${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
+   
+   // Sample descriptions for different types of services
+   const descriptions = [
+     "PERKHIDMATAN SISTEM IT",
+     "PERKHIDMATAN KONSULTASI KEWANGAN",
+     "PERKHIDMATAN AUDIT INTERNAL",
+     "PERKHIDMATAN LATIHAN KAKITANGAN",
+     "PERKHIDMATAN PEMBANGUNAN APLIKASI",
+     "PERKHIDMATAN PENYELENGGARAAN PERALATAN",
+     "PERKHIDMATAN KESELAMATAN MAKLUMAT",
+     "PERKHIDMATAN BACKUP DAN RECOVERY"
+   ];
+   
+   const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+   
+   return {
+     "Invoice No": invoiceNumber,
+     "Invoice Date": invoiceDate,
+     "PO Number": poNumber,
+     "Customer Ref": customerRef,
+     "Description": description,
+     "Subtotal": amount,
+     "SST (6%)": taxAmount,
+     "Total Amount": totalAmount,
+     "Status": "PAID"
+   };
+ };
+
+ // Function to linkify IDs in HTML content
+ const linkifyIDs = (html) => {
+   // Regex patterns for each type (adjust as needed)
+   const patterns = [
+     { type: 'po', regex: /(PO\d{6,}|PRO\d{3}\/\d{4})/g },
+     { type: 'bill', regex: /(APN\d{6}\/\d{4}|IR\d{9,})/g },
+     { type: 'invoice', regex: /(INV\d{6,})/g },
+     { type: 'voucher', regex: /(VCR\d{6,}\/\d{4})/g },
+     { type: 'payment', regex: /(EFT\d{5,}\/\d{4})/g }
+   ];
+   
+   patterns.forEach(({type, regex}) => {
+     html = html.replace(regex, match =>
+       `<span class="id-link cursor-pointer text-blue-600 hover:text-blue-800 underline" data-type="${type}" data-id="${match}">${match}</span>`
+     );
+   });
+   return html;
+ };
 
 // Function to show metadata modal
 const showMetadataModalData = (data) => {
@@ -329,12 +375,19 @@ const fetchAndShowMetadata = async (type, id) => {
       return;
     }
     
-    // For PO type, generate realistic details
-    if (type === 'po') {
-      const poDetails = generatePODetails(id, storedStatus?.status);
-      showMetadataModalData(poDetails);
-      return;
-    }
+         // For PO type, generate realistic details
+     if (type === 'po') {
+       const poDetails = generatePODetails(id, storedStatus?.status);
+       showMetadataModalData(poDetails);
+       return;
+     }
+     
+     // For invoice type, generate realistic details
+     if (type === 'invoice') {
+       const invoiceDetails = generateInvoiceDetails(id);
+       showMetadataModalData(invoiceDetails);
+       return;
+     }
     
     // For other types, try to fetch from API (if available)
     const response = await fetch(`http://157.245.54.152:8000/api/details?type=${typeMap(type)}&id=${encodeURIComponent(id)}`);
@@ -361,19 +414,20 @@ const fetchAndShowMetadata = async (type, id) => {
       };
       showMetadataModalData(paymentDetails);
     } else {
-      alert('Details not found!');
+    alert('Details not found!');
     }
   }
 };
 
-// Function to map types
-const typeMap = (type) => {
-  if (type === 'po') return 'purchase_order';
-  if (type === 'bill') return 'bill';
-  if (type === 'voucher') return 'voucher';
-  if (type === 'payment') return 'payment';
-  return '';
-};
+ // Function to map types
+ const typeMap = (type) => {
+   if (type === 'po') return 'purchase_order';
+   if (type === 'bill') return 'bill';
+   if (type === 'invoice') return 'invoice';
+   if (type === 'voucher') return 'voucher';
+   if (type === 'payment') return 'payment';
+   return '';
+ };
 
 // Configure marked for better rendering
 marked.setOptions({
@@ -430,14 +484,271 @@ const callChatAPI = async (message) => {
     if(message.toLowerCase().includes("bill numbers") || message.toLowerCase().includes("bill no")){
       const randomBills = generateRandomBillNumbers(5);
       return `${randomBills.join('\n')}
-
-If you need details about any bill, just click on its Bill No.`;
+      If you need details about any bill, just click on its Bill No.`;
     }
 
+    // Check if message asks for status of a specific PO number
+    if(message.toLowerCase().includes("what the status") && (message.toLowerCase().includes("po no") || message.toLowerCase().includes("po number") || message.toLowerCase().includes("po"))){
+      // Extract PO number from the message using regex
+      
+      const poRegex = /(PO\d{6,}|PRO\d{3}\/\d{4})/g;
+      const poMatches = message.match(poRegex);
+      
+      if (poMatches && poMatches.length > 0) {
+        const poNumber = poMatches[0];
+        
+        // Check if we have a stored status for this PO
+        const storedStatus = documentStatusMap.value.get(poNumber);
+        
+        if (storedStatus) {
+          // Use stored status if available
+          const status = storedStatus.status;
+          const amount = (Math.random() * 99000 + 1000).toFixed(1);
+          
+          return `Status for PO Number ${poNumber}:\n      
+          Status: ${status}\n
+          Amount: RM ${parseFloat(amount).toLocaleString('en-MY')}\n
+          Description: PERUBAHAN SISTEM APLIKASI\n
+          
+          This PO number has been processed and its current status is ${status}.`;
+        } else {
+          // Generate a random status if not stored
+          const statuses = ["APPROVE", "PENDING", "DRAFT", "REJECTED"];
+          const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+          const amount = (Math.random() * 99000 + 1000).toFixed(1);
+          
+          // Store this status for consistency
+          documentStatusMap.value.set(poNumber, { type: 'po', status: randomStatus });
+          
+          return `Status for PO Number ${poNumber}:          
+          Status: ${randomStatus}
+          Amount: RM ${parseFloat(amount).toLocaleString('en-MY')}
+          Description: PERUBAHAN SISTEM APLIKASI         
+          This PO number has been processed and its current status is ${randomStatus}.`;
+        }
+      } else {
+        // If no PO number found in message, generate a random one
+        const randomPO = generateRandomPONumbers(1)[0];
+        const statuses = ["APPROVE", "PENDING", "DRAFT", "REJECTED"];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        const amount = (Math.random() * 99000 + 1000).toFixed(1);
+        
+        // Store this status for consistency
+        documentStatusMap.value.set(randomPO, { type: 'po', status: randomStatus });
+        
+        return `I couldn't find a specific PO number in your message. Here's a sample PO status:\n
+        PO Number: ${randomPO}\n
+        Status: ${randomStatus}\n
+        Amount: RM ${parseFloat(amount).toLocaleString('en-MY')}\n
+        Description: PERUBAHAN SISTEM APLIKASI        
+        You can ask about any specific PO number by including it in your question.`;
+      }
+    }
+
+    // Check if message asks for PO numbers related to "sistem aplikasi"
+    if(message.toLowerCase().includes("list po no") && message.toLowerCase().includes("sistem aplikasi")){
+      const randomPOS = generateRandomPONumbers(5);
+      
+      // Filter descriptions to only include those related to "sistem aplikasi"
+      const sistemAplikasiDescriptions = [
+        "PERUBAHAN SISTEM APLIKASI",
+        "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+        "PEMBANGUNAN SISTEM APLIKASI BARU",
+        "UPGRADE SISTEM APLIKASI",
+        "PENYELENGGARAAN SISTEM APLIKASI",
+        "PERUBAHAN INFRASTRUKTUR SISTEM APLIKASI"
+      ];
+      
+      // Store these POs with APPROVE status for consistency
+      randomPOS.forEach(po => {
+        documentStatusMap.value.set(po, { type: 'po', status: 'APPROVE' });
+      });
+      
+        return `Here are the PO Numbers related to "SISTEM APLIKASI" with APPROVE status:
+        ${randomPOS.map(po => {
+          const description = sistemAplikasiDescriptions[Math.floor(Math.random() * sistemAplikasiDescriptions.length)];
+          const amount = (Math.random() * 100000 + 1000).toFixed(1);
+          return `${po}, Description: ${description}, Amount: ${parseFloat(amount).toLocaleString('en-MY')}`;
+        }).join('\n\n')}
+        All listed PO Numbers are related to "SISTEM APLIKASI" and have APPROVE status. If you need details about any PO, just click on its PO Number.`;
+    }
+
+    // Check if message asks for PO numbers with approve status
+    if(message.toLowerCase().includes("list po no") && message.toLowerCase().includes("approve status")){
+      const randomPOS = generateRandomPONumbers(5);
+      
+      // Store these POs with APPROVE status for consistency
+      randomPOS.forEach(po => {
+        documentStatusMap.value.set(po, { type: 'po', status: 'APPROVE' });
+      });
+      
+      return `Here are the PO Numbers with APPROVE status:
+      ${randomPOS.map(po => {
+        const descriptions = [
+          "PERUBAHAN SISTEM APLIKASI",
+          "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+          "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
+          "PEMBANGUNAN SISTEM APLIKASI BARU",
+          "PENYELENGGARAAN SISTEM IT",
+          "UPGRADE SISTEM KEWANGAN",
+          "PERUBAHAN INFRASTRUKTUR IT",
+          "PEMBAHARUAN SISTEM DATABASE"
+        ];
+        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+        const amount = (Math.random() * 100000 + 1000).toFixed(1);
+        return `${po},`;
+      }).join('\n\n')}
+      All listed PO Numbers have APPROVE status. If you need details about any PO, just click on its PO Number.`;
+    }
+
+         // Check if message asks for PO numbers with rejected status
+     if(message.toLowerCase().includes("list po no") && message.toLowerCase().includes("rejected status")){
+       const randomPOS = generateRandomPONumbers(5);
+       
+       // Store these POs with REJECTED status for consistency
+       randomPOS.forEach(po => {
+         documentStatusMap.value.set(po, { type: 'po', status: 'REJECTED' });
+       });
+       
+       return `Here are the PO Numbers with REJECTED status:
+       ${randomPOS.map(po => {
+         const descriptions = [
+           "PERUBAHAN SISTEM APLIKASI",
+           "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+           "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
+           "PEMBANGUNAN SISTEM APLIKASI BARU",
+           "PENYELENGGARAAN SISTEM IT",
+           "UPGRADE SISTEM KEWANGAN",
+           "PERUBAHAN INFRASTRUKTUR IT",
+           "PEMBAHARUAN SISTEM DATABASE"
+         ];
+         const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+         const amount = (Math.random() * 100000 + 1000).toFixed(1);
+         return `${po},`;
+       }).join('\n\n')}
+       All listed PO Numbers have REJECTED status. If you need details about any PO, just click on its PO Number.`;
+     }
+
+     // Check if message asks for total amount of approved purchase orders
+    if(message.toLowerCase().includes("total amount") && message.toLowerCase().includes("purchase po") && message.toLowerCase().includes("approve")){
+       const randomPOS = generateRandomPONumbers(8); // Generate more POs for better total calculation
+       
+       // Store these POs with APPROVE status for consistency
+       randomPOS.forEach(po => {
+         documentStatusMap.value.set(po, { type: 'po', status: 'APPROVE' });
+       });
+       
+       // Generate amounts and calculate total
+       const poDetails = randomPOS.map(po => {
+         const descriptions = [
+           "PERUBAHAN SISTEM APLIKASI",
+           "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+           "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS DI LPPM BAGI TEMPOH (17.06.2023 - 16.12.2023)",
+           "PEMBANGUNAN SISTEM APLIKASI BARU",
+           "PENYELENGGARAAN SISTEM IT",
+           "UPGRADE SISTEM KEWANGAN",
+           "PERUBAHAN INFRASTRUKTUR IT",
+           "PEMBAHARUAN SISTEM DATABASE"
+         ];
+         const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+         const amount = parseFloat((Math.random() * 100000 + 1000).toFixed(1));
+         return { po, description, amount };
+       });
+       
+       // Calculate total amount
+       const totalAmount = poDetails.reduce((sum, po) => sum + po.amount, 0);
+       
+       return `Total Amount for All Approved Purchase Orders: RM ${totalAmount.toLocaleString('en-MY')}`;
+     }
+
+           // Check if message asks for invoice numbers from 2024
+    if(message.toLowerCase().includes("all invoice no") || message.toLowerCase().includes("invoice number")){
+      const invoiceNumbers = [];
+      
+      // Generate 6-8 invoice numbers for 2024
+      for (let i = 0; i < 8; i++) {
+        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+        const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        const invoiceNo = `INV${month}24${sequence}`;
+        invoiceNumbers.push(invoiceNo);
+      }
+      
+      // Generate amounts and descriptions for each invoice
+      const invoiceDetails = invoiceNumbers.map(invoiceNo => {
+        const descriptions = [
+          "PERKHIDMATAN SISTEM IT",
+          "PERKHIDMATAN KONSULTASI KEWANGAN",
+          "PERKHIDMATAN AUDIT INTERNAL",
+          "PERKHIDMATAN LATIHAN KAKITANGAN",
+          "PERKHIDMATAN PEMBANGUNAN APLIKASI",
+          "PERKHIDMATAN PENYELENGGARAAN PERALATAN",
+          "PERKHIDMATAN KESELAMATAN MAKLUMAT",
+          "PERKHIDMATAN BACKUP DAN RECOVERY"
+        ];
+        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+        const amount = (Math.random() * 50000 + 1000).toFixed(2);
+        return { invoiceNo, description, amount };
+      });
+      
+      return `Here are all Invoice Numbers from 2024:
+        ${invoiceDetails.map(inv => 
+          `${inv.invoiceNo}, Description: ${inv.description}, Amount: RM ${parseFloat(inv.amount).toLocaleString('en-MY')}`
+        ).join('\n\n')}
+        All listed Invoice Numbers are from 2024. If you need details about any invoice, just click on its Invoice Number.`;
+    }
+
+      // Check if message asks for total amount of invoices in 2024
+    if(message.toLowerCase().includes("total amount") && message.toLowerCase().includes("invoice") ){
+      const invoiceNumbers = [];
+      
+      // Generate 10 invoice numbers for 2024 for better total calculation
+      for (let i = 0; i < 10; i++) {
+        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+        const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        const invoiceNo = `INV${month}24${sequence}`;
+        invoiceNumbers.push(invoiceNo);
+      }
+      
+      // Generate amounts and descriptions for each invoice
+      const invoiceDetails = invoiceNumbers.map(invoiceNo => {
+        const descriptions = [
+          "PERKHIDMATAN SISTEM IT",
+          "PERKHIDMATAN KONSULTASI KEWANGAN",
+          "PERKHIDMATAN AUDIT INTERNAL",
+          "PERKHIDMATAN LATIHAN KAKITANGAN",
+          "PERKHIDMATAN PEMBANGUNAN APLIKASI",
+          "PERKHIDMATAN PENYELENGGARAAN PERALATAN",
+          "PERKHIDMATAN KESELAMATAN MAKLUMAT",
+          "PERKHIDMATAN BACKUP DAN RECOVERY"
+        ];
+        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+        const subtotal = parseFloat((Math.random() * 50000 + 1000).toFixed(2));
+        const sst = parseFloat((subtotal * 0.06).toFixed(2)); // 6% SST
+        const totalAmount = subtotal + sst;
+        return { invoiceNo, description, subtotal, sst, totalAmount };
+      });
+      
+      // Calculate total amounts
+      const totalSubtotal = invoiceDetails.reduce((sum, inv) => sum + inv.subtotal, 0);
+      const totalSST = invoiceDetails.reduce((sum, inv) => sum + inv.sst, 0);
+      const grandTotal = invoiceDetails.reduce((sum, inv) => sum + inv.totalAmount, 0);
+      
+      return `**Summary for Invoices:**
+      - **Total Subtotal: RM ${totalSubtotal.toLocaleString('en-MY')}**
+      - **Total SST (6%): RM ${totalSST.toLocaleString('en-MY')}**
+      - **Grand Total: RM ${grandTotal.toLocaleString('en-MY')}**`
+    }
+
+    
+
+    
+
+    
     // Check if message contains "po no" or "PO no"
     if(message.toLowerCase().includes("po no") || message.toLowerCase().includes("po numbers")){
       const randomPOS = generateRandomPONumbers(5);
       // return `Here are the PO Numbers with status APPROVE (acceptable):
+    
       return `
       
       ${randomPOS.map(po => {
@@ -459,79 +770,83 @@ If you need details about any bill, just click on its Bill No.`;
       All listed PO Numbers are acceptable as their status is APPROVE. If you need details about any PO, just click on its PO Number`;
     }
 
-    // Check if message contains "status"
-    if(message.toLowerCase().includes("status")){
-      // Generate a mix of documents with different statuses
-      const documents = [];
-      
-      // Clear previous status mapping
-      documentStatusMap.value.clear();
-      
-      // Generate 2-3 bills with different statuses
-      const billStatuses = ["APPROVE", "PENDING", "REJECT"];
-      for (let i = 0; i < 3; i++) {
-        const randomNum = Math.floor(Math.random() * 900) + 100;
-        const year = '24';
-        const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-        const billNumber = `APN000${randomNum}/${year}${month}`;
-        const status = billStatuses[i];
-        const amount = (Math.random() * 49000 + 1000).toFixed(2);
-        
-        // Store the status mapping for this bill
-        documentStatusMap.value.set(billNumber, { type: 'bill', status: status });
-        
-        documents.push({
-          type: "Bill",
-          number: billNumber,
-          status: status,
-          amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          description: "PERKHIDMATAN SISTEM IT"
-        });
-      }
-      
-      // Generate 2-3 POs with different statuses
-      const poStatuses = ["APPROVE", "DRAFT", "PENDING"];
-      for (let i = 0; i < 3; i++) {
-        let poNumber;
-        if (Math.random() > 0.5) {
-          const randomNum = Math.floor(Math.random() * 900) + 100;
-          const year = '24';
-          const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-          poNumber = `PRO${randomNum}/${year}${month}`;
-        } else {
-          const year = '23';
-          const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-          const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0');
-          const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-          poNumber = `PO${year}${month}${day}${sequence}`;
-        }
-        
-        const status = poStatuses[i];
-        const amount = (Math.random() * 99000 + 1000).toFixed(1);
-        
-        // Store the status mapping for this PO
-        documentStatusMap.value.set(poNumber, { type: 'po', status: status });
-        
-        documents.push({
-          type: "PO",
-          number: poNumber,
-          status: status,
-          amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
-          description: "PERUBAHAN SISTEM APLIKASI"
-        });
-      }
-      
-      return `Here are documents with their current statuses:
+    
 
-      ${documents.map(doc => 
-        `${doc.type}: ${doc.number}
-      Status: **${doc.status}**
-      Amount: ${doc.amount}
-      Description: ${doc.description}`
-      ).join('\n\n')}
-      <br><br>
-      Click on any document number to view complete details including the status shown above.`;
-    }
+    
+
+    // // Check if message contains "status"
+    // if(message.toLowerCase().includes("status")){
+    //   // Generate a mix of documents with different statuses
+    //   const documents = [];
+      
+    //   // Clear previous status mapping
+    //   documentStatusMap.value.clear();
+      
+    //   // Generate 2-3 bills with different statuses
+    //   const billStatuses = ["APPROVE", "PENDING", "REJECT"];
+    //   for (let i = 0; i < 3; i++) {
+    //     const randomNum = Math.floor(Math.random() * 900) + 100;
+    //     const year = '24';
+    //     const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+    //     const billNumber = `APN000${randomNum}/${year}${month}`;
+    //     const status = billStatuses[i];
+    //     const amount = (Math.random() * 49000 + 1000).toFixed(2);
+        
+    //     // Store the status mapping for this bill
+    //     documentStatusMap.value.set(billNumber, { type: 'bill', status: status });
+        
+    //     documents.push({
+    //       type: "Bill",
+    //       number: billNumber,
+    //       status: status,
+    //       amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    //       description: "PERKHIDMATAN SISTEM IT"
+    //     });
+    //   }
+      
+    //   // Generate 2-3 POs with different statuses
+    //   const poStatuses = ["APPROVE", "DRAFT", "PENDING"];
+    //   for (let i = 0; i < 3; i++) {
+    //     let poNumber;
+    //     if (Math.random() > 0.5) {
+    //       const randomNum = Math.floor(Math.random() * 900) + 100;
+    //       const year = '24';
+    //       const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+    //       poNumber = `PRO${randomNum}/${year}${month}`;
+    //     } else {
+    //       const year = '23';
+    //       const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+    //       const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0');
+    //       const sequence = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+    //       poNumber = `PO${year}${month}${day}${sequence}`;
+    //     }
+        
+    //     const status = poStatuses[i];
+    //     const amount = (Math.random() * 99000 + 1000).toFixed(1);
+        
+    //     // Store the status mapping for this PO
+    //     documentStatusMap.value.set(poNumber, { type: 'po', status: status });
+        
+    //     documents.push({
+    //       type: "PO",
+    //       number: poNumber,
+    //       status: status,
+    //       amount: `RM ${parseFloat(amount).toLocaleString('en-MY', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
+    //       description: "PERUBAHAN SISTEM APLIKASI"
+    //     });
+    //   }
+      
+    //   return `Here are documents with their current statuses:
+
+    //   ${documents.map(doc => 
+    //     `${doc.type}: ${doc.number}
+    //   Status: **${doc.status}**
+    //   Amount: ${doc.amount}
+    //   Description: ${doc.description}`
+    //   ).join('\n\n')}
+    //   <br><br>
+    //   Click on any document number to view complete details including the status shown above.`;
+    // }
 
     // // Call the actual API for other queries
     // const response = await fetch(API_BASE_URL, {
