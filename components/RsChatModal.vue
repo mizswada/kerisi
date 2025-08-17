@@ -690,11 +690,11 @@ const callChatAPI = async (message) => {
         return { invoiceNo, description, amount };
       });
       
-      return `Here are all Invoice Numbers from 2024:
+      return `Here are all Invoice Numbers:
         ${invoiceDetails.map(inv => 
-          `${inv.invoiceNo}, Description: ${inv.description}, Amount: RM ${parseFloat(inv.amount).toLocaleString('en-MY')}`
+          `${inv.invoiceNo},`
         ).join('\n\n')}
-        All listed Invoice Numbers are from 2024. If you need details about any invoice, just click on its Invoice Number.`;
+        If you need details about any invoice, just click on its Invoice Number.`;
     }
 
       // Check if message asks for total amount of invoices in 2024
