@@ -568,9 +568,9 @@ const callChatAPI = async (message) => {
         ${randomPOS.map(po => {
           const description = sistemAplikasiDescriptions[Math.floor(Math.random() * sistemAplikasiDescriptions.length)];
           const amount = (Math.random() * 100000 + 1000).toFixed(1);
-          return `${po}, Description: ${description}, Amount: ${parseFloat(amount).toLocaleString('en-MY')}`;
+          return `${po},`;
         }).join('\n\n')}
-        All listed PO Numbers are related to "SISTEM APLIKASI" and have APPROVE status. If you need details about any PO, just click on its PO Number.`;
+        If you need details about any PO, just click on its PO Number.`;
     }
 
     // Check if message asks for PO numbers with approve status
