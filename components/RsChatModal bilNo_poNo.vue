@@ -437,26 +437,30 @@ If you need details about any bill, just click on its Bill No.`;
     // Check if message contains "po no" or "PO no"
     if(message.toLowerCase().includes("po no") || message.toLowerCase().includes("po numbers")){
       const randomPOS = generateRandomPONumbers(5);
-      // return `Here are the PO Numbers with status APPROVE (acceptable):
-      return `
-      
-      ${randomPOS.map(po => {
-        const descriptions = [
-          "PERUBAHAN SISTEM APLIKASI",
-          "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
-          "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS",
-          "PEMBANGUNAN SISTEM APLIKASI BARU",
-          "PENYELENGGARAAN SISTEM IT",
-          "UPGRADE SISTEM KEWANGAN",
-          "PERUBAHAN INFRASTRUKTUR IT",
-          "PEMBAHARUAN SISTEM DATABASE"
-        ];
-        const description = descriptions[Math.floor(Math.random() * descriptions.length)];
-        const amount = (Math.random() * 100000 + 1000).toFixed(1);
-        return `${po},`;
-        // return `${po}, \nDescription: ${description},Amount: ${parseFloat(amount).toLocaleString('en-MY')}`;
-      }).join('\n\n')}
-      All listed PO Numbers are acceptable as their status is APPROVE. If you need details about any PO, just click on its PO Number`;
+      return `Here are the PO Numbers with status APPROVE (acceptable):
+
+
+
+${randomPOS.map(po => {
+  const descriptions = [
+    "PERUBAHAN SISTEM APLIKASI",
+    "PERMOHONAN PERUBAHAN SISTEM APLIKASI",
+    "MEMPERBAHARUI PENYELENGGARAAN SISTEM KEWANGAN MYFIS",
+    "PEMBANGUNAN SISTEM APLIKASI BARU",
+    "PENYELENGGARAAN SISTEM IT",
+    "UPGRADE SISTEM KEWANGAN",
+    "PERUBAHAN INFRASTRUKTUR IT",
+    "PEMBAHARUAN SISTEM DATABASE"
+  ];
+  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+  const amount = (Math.random() * 100000 + 1000).toFixed(1);
+  return `${po}, Description: ${description}, Amount: ${parseFloat(amount).toLocaleString('en-MY')}`;
+}).join('\n\n')}
+
+
+All listed PO Numbers are acceptable as their status is APPROVE.
+
+If you need details about any PO, just click on its PO No.`;
     }
 
     // Check if message contains "status"
@@ -529,7 +533,7 @@ If you need details about any bill, just click on its Bill No.`;
       Amount: ${doc.amount}
       Description: ${doc.description}`
       ).join('\n\n')}
-      <br><br>
+
       Click on any document number to view complete details including the status shown above.`;
     }
 
