@@ -71,6 +71,10 @@
             <rs-button type="button" variant="secondary" @click="resetForm">
               Reset
             </rs-button>
+            <rs-button type="button" variant="info" @click="previewFile" :disabled="!formData.bankStatementFile">
+              <Icon name="ic:outline-preview" class="mr-2" size="1rem" />
+              Preview File
+            </rs-button>
             <rs-button type="button" variant="primary" @click="submitForm" :disabled="!isFormValid">
               <Icon name="ic:outline-file-upload" class="mr-2" size="1rem" />
               Upload Statement
@@ -113,6 +117,10 @@
           <div class="flex justify-end mt-6 gap-3">
             <rs-button type="button" variant="secondary" @click="resetForm">
               Reset
+            </rs-button>
+            <rs-button type="button" variant="info" @click="previewFile" :disabled="!formData.bankStatementAIFile">
+              <Icon name="ic:outline-preview" class="mr-2" size="1rem" />
+              Preview File
             </rs-button>
             <rs-button type="button" variant="info" @click="switchToNormalUpload">
               <Icon name="ic:outline-file-upload" class="mr-2" size="1rem" />
@@ -189,8 +197,184 @@
       </template>
     </rs-card>
 
-    <!-- Bank Statement Data Table Card -->
-    <rs-card v-if="isDocumentUploaded">
+    <!-- Data Selection Modal -->
+    <rs-modal v-model="showDataSelectionModal" size="full" :closable="false">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold">Select Data to Import</h2>
+          <div class="text-sm text-gray-600">
+            <Icon name="ic:outline-description" class="mr-1" size="1rem" />
+            {{ uploadedFileName }}
+          </div>
+        </div>
+      </template>
+       <template #body>
+         <div class="p-4">
+           <div class="mb-4 flex justify-between items-center">
+             <div class="flex items-center space-x-4">
+               <label class="flex items-center">
+                 <input
+                   type="checkbox"
+                   v-model="selectAll"
+                   @change="toggleSelectAll"
+                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                 />
+                 <span class="ml-2 text-sm font-medium text-gray-700">Select All</span>
+               </label>
+               <span class="text-sm text-gray-500">
+                 {{ selectedTransactions.length }} of {{ bankStatementData.length }} selected
+               </span>
+             </div>
+             <div class="flex space-x-2">
+               <rs-button variant="secondary" size="sm" @click="clearSelection">
+                 Clear Selection
+               </rs-button>
+             </div>
+           </div>
+
+           <!-- Data Table with Checkboxes -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      <input
+                        type="checkbox"
+                        v-model="selectAll"
+                        @change="toggleSelectAll"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Transaction ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Date</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Account Number</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Branch Code</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Amount</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(row, index) in bankStatementData" :key="index" class="hover:bg-gray-50">
+                    <td class="px-4 py-3 whitespace-nowrap border-b">
+                      <input
+                        type="checkbox"
+                        :checked="selectedIndices.includes(index)"
+                        @change="updateSelection(index)"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b">{{ row['Transaction ID'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b">{{ row['Date'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b">{{ row['Account Number'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-b">{{ row['Branch Code'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-b">
+                      {{ formatCurrency(row['Amount']) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+         </div>
+       </template>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <rs-button variant="secondary" @click="cancelDataSelection">
+            Cancel
+          </rs-button>
+          <rs-button variant="primary" @click="confirmDataSelection" :disabled="selectedTransactions.length === 0">
+            <Icon name="ic:outline-check-circle" class="mr-2" size="1rem" />
+            CONFIRM ({{ selectedTransactions.length }} selected)
+          </rs-button>
+        </div>
+      </template>
+    </rs-modal>
+
+    <!-- File Preview Modal -->
+    <rs-modal v-model="showPreviewModal" size="6xl" :closable="true">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold">File Preview</h2>
+          <div class="text-sm text-gray-600">
+            <Icon name="ic:outline-description" class="mr-1" size="1rem" />
+            {{ previewFileName }}
+          </div>
+        </div>
+      </template>
+      <template #body>
+        <div class="p-4">
+          <div class="mb-4">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div class="bg-blue-50 p-3 rounded-lg">
+                <div class="flex items-center">
+                  <Icon name="ic:outline-description" class="mr-2 text-blue-600" size="1.25rem" />
+                  <div>
+                    <h4 class="font-semibold text-blue-800">File Name</h4>
+                    <p class="font-mono text-blue-700 text-sm">{{ previewFileName }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-green-50 p-3 rounded-lg">
+                <div class="flex items-center">
+                  <Icon name="ic:outline-category" class="mr-2 text-green-600" size="1.25rem" />
+                  <div>
+                    <h4 class="font-semibold text-green-800">File Type</h4>
+                    <p class="font-mono text-green-700 text-sm">{{ previewFileType }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">
+              This is a preview of your file content. Please review before proceeding with the upload.
+            </p>
+          </div>
+          
+          <!-- File Content Display -->
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div class="max-h-96 overflow-y-auto">
+              <!-- Show image for PDF files, text for other files -->
+              <div v-if="previewFileContent === 'IMAGE_PREVIEW'" class="text-center">
+                <img 
+                  src="/img/screenshot.png" 
+                  alt="PDF Preview Screenshot" 
+                  class="max-w-full h-auto mx-auto rounded-lg shadow-lg"
+                  style="max-height: 400px;"
+                />
+                <p class="text-sm text-gray-600 mt-3">
+                  This is a preview screenshot of your PDF document. The actual file will be processed during upload.
+                </p>
+              </div>
+              <pre v-else class="text-sm text-gray-800 whitespace-pre-wrap font-mono">{{ previewFileContent }}</pre>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+            <div class="flex items-center">
+              <Icon name="ic:outline-info" class="mr-2 text-blue-600" size="1.25rem" />
+              <div>
+                <h4 class="font-semibold text-blue-800">Preview Information</h4>
+                <p class="text-blue-700 text-sm mt-1">
+                  This preview shows the raw content of your file. After upload, the system will process and format this data for better display.
+                  {{ previewFileType === 'PDF Document' ? 'PDF files will be processed using AI technology.' : '' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end space-x-3">
+          <rs-button variant="secondary" @click="closePreviewModal">
+            Close
+          </rs-button>
+          <rs-button variant="primary" @click="closePreviewModal">
+            <Icon name="ic:outline-check-circle" class="mr-2" size="1rem" />
+            Continue with Upload
+          </rs-button>
+        </div>
+      </template>
+    </rs-modal>
+
+    <!-- Bank Statement Data Table Card (shown after selection) -->
+    <rs-card v-if="isDocumentUploaded && !showDataSelectionModal">
       <template #header>
         <div class="flex justify-between items-center">
           <h2 class="text-xl font-semibold">Bank Statement Data</h2>
@@ -203,7 +387,8 @@
       <template #body>
         <rs-table
           :field="tableHeaders"
-          :data="bankStatementData"
+          :data="selectedTransactions"
+          :fieldLabels="fieldLabels"
           :options="{
             variant: 'default',
             striped: true,
@@ -220,40 +405,33 @@
           :pageSize="10"
           advanced
         >
-          <!-- Custom formatting for currency columns -->
-          <template #debitAmountRM="{ text }">
-            <span v-if="text && text !== '-'" class="text-red-600 font-medium">
+          <!-- Custom formatting for Amount column -->
+          <template #Amount="{ text }">
+            <span class="font-medium text-blue-600">
               {{ formatCurrency(text) }}
             </span>
-            <span v-else class="text-gray-400">-</span>
           </template>
           
-          <template #creditAmountRM="{ text }">
-            <span v-if="text && text !== '-'" class="text-green-600 font-medium">
-              {{ formatCurrency(text) }}
-            </span>
-            <span v-else class="text-gray-400">-</span>
-          </template>
-          
-          <template #balanceRM="{ text }">
-            <span class="font-medium" :class="parseFloat(text) >= 0 ? 'text-green-600' : 'text-red-600'">
-              {{ formatCurrency(text) }}
+          <!-- Balance formatting -->
+          <template #Balance="{ text }">
+            <span class="font-medium" :class="text.includes('+') ? 'text-green-600' : 'text-red-600'">
+              {{ text }}
             </span>
           </template>
           
           <!-- Transaction Type Badge -->
-          <template #transactionType="{ text }">
+          <template #Transaction_Type="{ text }">
             <rs-badge 
-              :variant="text === 'Credit' ? 'success' : text === 'Debit' ? 'danger' : 'secondary'"
+              :variant="text.includes('CR') || text.includes('Credit') ? 'success' : text.includes('Debit') ? 'danger' : 'secondary'"
               size="sm"
             >
               {{ text }}
             </rs-badge>
           </template>
           
-          <!-- Bank Statement Date formatting -->
-          <template #bankStatementDate="{ text }">
-            <span class="text-sm">{{ formatDate(text) }}</span>
+          <!-- Date formatting -->
+          <template #Date="{ text }">
+            <span class="text-sm">{{ text }}</span>
           </template>
         </rs-table>
       </template>
@@ -294,6 +472,11 @@ const uploadedFileDetails = ref({
   accountBankNo: '',
   fileName: ''
 });
+
+// Modal and selection management
+const showDataSelectionModal = ref(false);
+const selectAll = ref(false);
+const selectedTransactions = ref([]);
 
 // Dropdown options for file upload form
 const fileTypeOptions = [
@@ -362,13 +545,21 @@ const handleFileUpload = async (formValues) => {
     }
     isDocumentUploaded.value = true;
     
-    // Show success message
+    // Reset selection state
+    selectAll.value = false;
+    selectedTransactions.value = [];
+    selectedIndices.value = [];
+    
+    // Show success message and then open data selection modal
     await $swal.fire({
       title: 'Success!',
-      text: `Document has been processed successfully.`,
+      text: `Document has been processed successfully. Please select the transactions you want to import.`,
       icon: 'success',
       confirmButtonText: 'OK'
     });
+    
+    // Open the data selection modal
+    showDataSelectionModal.value = true;
     
     // Optionally refresh the table data or redirect
     // await refreshTableData();
@@ -392,7 +583,7 @@ const handleFileChange = (event) => {
       formData.value.bankStatementAIFile = file;
       console.log('AI File selected:', file.name);
     } else {
-      formData.value.bankStatementFile = file;
+      formData.value.bankStatementFile = file; // Store the file object directly, not in an array
       console.log('Normal File selected:', file.name);
     }
     
@@ -401,12 +592,16 @@ const handleFileChange = (event) => {
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
     
     if (!allowedTypes.includes(fileExtension)) {
-      $swal.fire({
-        title: 'Invalid File Type!',
-        text: 'Please select a CSV, TXT, XLSX, or PDF file.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+      if ($swal) {
+        $swal.fire({
+          title: 'Invalid File Type!',
+          text: 'Please select a CSV, TXT, XLSX, or PDF file.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        alert('Invalid File Type! Please select a CSV, TXT, XLSX, or PDF file.');
+      }
       
       // Clear the appropriate file field
       if (isAIUpload.value) {
@@ -465,6 +660,12 @@ const resetForm = () => {
     accountBankNo: '',
     fileName: ''
   };
+  
+  // Reset modal and selection state
+  showDataSelectionModal.value = false;
+  selectAll.value = false;
+  selectedTransactions.value = [];
+  selectedIndices.value = [];
 };
 
 // Computed property to check if form is valid
@@ -506,94 +707,89 @@ watch(() => formData.value.accountCode, (newAccountCode) => {
   updateBankAccountNumber(newAccountCode);
 });
 
-// Table headers matching the user's requirements
+// Table headers matching the new data structure
 const tableHeaders = [
-  "No",
-  "Bank Sequence ID", 
-  "Bank Statement Date",
-  "Bank Transcode",
-  "Transaction Description",
-  "Transaction Type",
-  "Debit Amount (RM)",
-  "Credit Amount (RM)", 
-  "Balance (RM)",
-  "FPX No",
-  "Payment Details",
-  "Bank Remark"
+  'Transaction ID',
+  'Date', 
+  'Account Number',
+  'Branch Code',
+  'Transaction Type',
+  'Amount',
+  'Balance',
+  'Description',
+  'Receiver'
 ];
 
-// Sample bank statement data
+// Table headers with checkbox column
+const tableHeadersWithCheckbox = [
+  'Select',
+  'Transaction ID',
+  'Date', 
+  'Account Number',
+  'Branch Code',
+  'Transaction Type',
+  'Amount',
+  'Balance',
+  'Description',
+  'Receiver'
+];
+
+// Field labels for display
+const fieldLabels = {
+  'Select': 'Select',
+  'Transaction ID': 'Transaction ID',
+  'Date': 'Date',
+  'Account Number': 'Account Number',
+  'Branch Code': 'Branch Code',
+  'Transaction Type': 'Transaction Type',
+  'Amount': 'Amount',
+  'Balance': 'Balance',
+  'Description': 'Description',
+  'Receiver': 'Receiver'
+};
+
+// Computed property to map data correctly for the table
+const mappedTableData = computed(() => {
+  return bankStatementData.value.map((item, index) => ({
+    'Select': index, // Use index for checkbox
+    'Transaction ID': item['Transaction ID'],
+    'Date': item['Date'],
+    'Account Number': item['Account Number'],
+    'Branch Code': item['Branch Code'],
+    'Transaction Type': item['Transaction Type'],
+    'Amount': item['Amount'],
+    'Balance': item['Balance'],
+    'Description': item['Description'],
+    'Receiver': item['Receiver']
+  }));
+});
+
+// Bank statement data with new structure
 const bankStatementData = ref([
-  {
-    no: 1,
-    bankSequenceId: "BSQ001234567",
-    bankStatementDate: "2024-01-15",
-    bankTranscode: "TXN2024011501",
-    transactionDescription: "Online Transfer - Salary Payment",
-    transactionType: "Credit",
-    debitAmountRM: "-",
-    creditAmountRM: "5500.00",
-    balanceRM: "12750.50", 
-    fpxNo: "FPX240115001",
-    paymentDetails: "Monthly Salary - Company ABC Sdn Bhd",
-    bankRemark: "Processed successfully"
-  },
-  {
-    no: 2,
-    bankSequenceId: "BSQ001234568",
-    bankStatementDate: "2024-01-16",
-    bankTranscode: "TXN2024011602",
-    transactionDescription: "ATM Withdrawal",
-    transactionType: "Debit",
-    debitAmountRM: "500.00",
-    creditAmountRM: "-",
-    balanceRM: "12250.50",
-    fpxNo: "-",
-    paymentDetails: "Cash withdrawal at ATM Pavilion KL",
-    bankRemark: "Transaction completed"
-  },
-  {
-    no: 3,
-    bankSequenceId: "BSQ001234569", 
-    bankStatementDate: "2024-01-17",
-    bankTranscode: "TXN2024011703",
-    transactionDescription: "Online Purchase - E-commerce",
-    transactionType: "Debit",
-    debitAmountRM: "125.80",
-    creditAmountRM: "-",
-    balanceRM: "12124.70",
-    fpxNo: "FPX240117002",
-    paymentDetails: "Shopee - Electronics purchase",
-    bankRemark: "Payment authorized"
-  },
-  {
-    no: 4,
-    bankSequenceId: "BSQ001234570",
-    bankStatementDate: "2024-01-18",
-    bankTranscode: "TXN2024011804",
-    transactionDescription: "Direct Debit - Utility Bill",
-    transactionType: "Debit", 
-    debitAmountRM: "240.50",
-    creditAmountRM: "-",
-    balanceRM: "11884.20",
-    fpxNo: "-",
-    paymentDetails: "TNB Electricity Bill - Auto Debit",
-    bankRemark: "Scheduled payment"
-  },
-  {
-    no: 5,
-    bankSequenceId: "BSQ001234571",
-    bankStatementDate: "2024-01-19",
-    bankTranscode: "TXN2024011905",
-    transactionDescription: "Interest Credit",
-    transactionType: "Credit",
-    debitAmountRM: "-",
-    creditAmountRM: "15.25",
-    balanceRM: "11899.45",
-    fpxNo: "-",
-    paymentDetails: "Monthly savings account interest",
-    bankRemark: "Interest credited"
-  }
+  { 'Transaction ID': '000001', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9047', 'Transaction Type': 'IB FPX (CR) - CASA', 'Amount': '1500.00', 'Balance': '955478.59+', 'Description': '', 'Receiver': 'SAU EMPIRE RESOURCES' },
+  { 'Transaction ID': '000002', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9047', 'Transaction Type': 'IB FPX (CR) - CASA', 'Amount': '0.50', 'Balance': '955478.09+', 'Description': '', 'Receiver': 'SAU EMPIRE RESOURCES' },
+  { 'Transaction ID': '000003', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '100.00', 'Balance': '955578.09+', 'Description': 'Fund Transfer', 'Receiver': 'RADIN ALANG ISKANDAR' },
+  { 'Transaction ID': '000004', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '1075.90', 'Balance': '956653.99+', 'Description': 'POTONGAN ZAKAT ALME NIAGA SDN. BHD.', 'Receiver': 'ALME NIAGA SDN. BHD.' },
+  { 'Transaction ID': '000005', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1533', 'Transaction Type': 'CA CREDIT ADVICE', 'Amount': '2488.49', 'Balance': '959142.48+', 'Description': 'CC 01012025 PYMT SETT (38600900002)', 'Receiver': 'MAJLIS AGAMA ISLAM D' },
+  { 'Transaction ID': '000006', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1533', 'Transaction Type': 'CA CREDIT ADVICE', 'Amount': '3563.08', 'Balance': '962705.56+', 'Description': 'CC 01012025 PYMT SETT (38600900001)', 'Receiver': 'MAJLIS AGAMA ISLAM D' },
+  { 'Transaction ID': '000007', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1533', 'Transaction Type': 'CA CREDIT ADVICE', 'Amount': '41846.71', 'Balance': '1004552.27+', 'Description': 'CC 01012025 PYMT SETT (38600900002)', 'Receiver': 'MAJLIS AGAMA ISLAM D' },
+  { 'Transaction ID': '000008', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1533', 'Transaction Type': 'CA CREDIT ADVICE', 'Amount': '44627.74', 'Balance': '1049180.01+', 'Description': 'CC 01012025 PYMT SETT (38600900001)', 'Receiver': 'MAJLIS AGAMA ISLAM D' },
+  { 'Transaction ID': '000009', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '500.00', 'Balance': '1049680.01+', 'Description': 'ZAKAT', 'Receiver': 'HEZERIHISYAM BIN SAM' },
+  { 'Transaction ID': '000010', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '300.00', 'Balance': '1049980.01+', 'Description': 'POTONGAN ZAKAT IFMAL TRADE SDN. BHD.', 'Receiver': 'IFMAL TRADE SDN BHD' },
+  { 'Transaction ID': '000011', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '10.00', 'Balance': '1049990.01+', 'Description': 'Zakat', 'Receiver': 'MOHD PETRA BIN SERI' },
+  { 'Transaction ID': '000012', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '2600.00', 'Balance': '1052590.01+', 'Description': 'Zakat simpanan 2024', 'Receiver': 'MAS LAILI BINTI SAAR' },
+  { 'Transaction ID': '000013', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '6000.00', 'Balance': '1058590.01+', 'Description': 'Zakat 2024', 'Receiver': 'MOHD HAFIZ AHMAD' },
+  { 'Transaction ID': '000014', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '250.00', 'Balance': '1058840.01+', 'Description': 'Jan 2025', 'Receiver': 'MUHAMAD AZMAN BIN AB' },
+  { 'Transaction ID': '000015', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '900.00', 'Balance': '1059740.01+', 'Description': 'ZAKAT 12/2024', 'Receiver': 'DUTA AMAN PLT' },
+  { 'Transaction ID': '000016', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '860.00', 'Balance': '1060600.01+', 'Description': 'Zakat', 'Receiver': 'NURUL AFIQAH BINTI M' },
+  { 'Transaction ID': '001132', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1590', 'Transaction Type': 'IBG TRANSFER TO CA', 'Amount': '203.00', 'Balance': '24173557.24+', 'Description': 'G-94653-4781 ZKMAIPS', 'Receiver': 'RAZER MERCHANT SERVI' },
+  { 'Transaction ID': '001133', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1590', 'Transaction Type': 'IBG TRANSFER TO CA', 'Amount': '22.00', 'Balance': '24173579.24+', 'Description': 'RPP-94653-1551 ZKMAIPS', 'Receiver': 'RAZER MERCHANT SERVI' },
+  { 'Transaction ID': '001134', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '1590', 'Transaction Type': 'IBG TRANSFER TO CA', 'Amount': '36544.22', 'Balance': '24210123.46+', 'Description': 'ZKmaips -', 'Receiver': 'RAZER MERCHANT SERVICES SDN. BHD.' },
+  { 'Transaction ID': '001135', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '1000.00', 'Balance': '24211123.46+', 'Description': 'Zakat 0125', 'Receiver': 'SYAIRUL BIN SULAIMAN' },
+  { 'Transaction ID': '001136', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '765.00', 'Balance': '24211888.46+', 'Description': 'Zakat Pendptan 731020086171', 'Receiver': 'MOHD REDZAN BIN CHE' },
+  { 'Transaction ID': '001137', 'Date': '01/01/2025', 'Account Number': '09010010055290', 'Branch Code': '9895', 'Transaction Type': 'INW DuitNow Transfer', 'Amount': '500.00', 'Balance': '24212388.46+', 'Description': 'Zakat 2024 Muhammad Hezri', 'Receiver': 'SYUHAIDA BINTI MUHAM' },
+  { 'Transaction ID': '001138', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '0144', 'Transaction Type': 'TRANSFER TO CA', 'Amount': '24128009.91', 'Balance': '84378.55+', 'Description': '9010010000575', 'Receiver': 'MAJLIS AGAMA ISLAM DAN ADAT ISTIADAT MEL' },
+  { 'Transaction ID': '001139', 'Date': '31/01/2025', 'Account Number': '09010010055290', 'Branch Code': '0160', 'Transaction Type': 'PROFIT PAID', 'Amount': '4718.29', 'Balance': '89096.84+', 'Description': '', 'Receiver': '' }
 ]);
 
 // Utility functions for formatting
@@ -608,6 +804,16 @@ const formatCurrency = (amount) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return '-';
+  // Handle DD/MM/YYYY format
+  if (dateString.includes('/')) {
+    const [day, month, year] = dateString.split('/');
+    return new Date(year, month - 1, day).toLocaleDateString('en-MY', {
+      year: 'numeric',
+      month: 'short', 
+      day: '2-digit'
+    });
+  }
+  // Handle ISO date format
   return new Date(dateString).toLocaleDateString('en-MY', {
     year: 'numeric',
     month: 'short', 
@@ -626,6 +832,174 @@ const getFileTypeFromName = (fileName) => {
     'pdf': 'PDF Document'
   };
   return typeMap[extension] || 'Unknown Format';
+};
+
+// Track selected indices instead of modifying objects
+const selectedIndices = ref([]);
+
+
+
+// Selection management functions
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    // Select all
+    selectedIndices.value = bankStatementData.value.map((_, index) => index);
+    selectedTransactions.value = [...bankStatementData.value];
+  } else {
+    // Deselect all
+    selectedIndices.value = [];
+    selectedTransactions.value = [];
+  }
+};
+
+const updateSelection = (index) => {
+  if (selectedIndices.value.includes(index)) {
+    // Remove from selection
+    selectedIndices.value = selectedIndices.value.filter(i => i !== index);
+  } else {
+    // Add to selection
+    selectedIndices.value.push(index);
+  }
+  
+  // Update selected transactions
+  selectedTransactions.value = selectedIndices.value.map(i => bankStatementData.value[i]);
+  
+  // Update select all state
+  selectAll.value = selectedIndices.value.length === bankStatementData.value.length;
+};
+
+const clearSelection = () => {
+  selectAll.value = false;
+  selectedIndices.value = [];
+  selectedTransactions.value = [];
+};
+
+const confirmDataSelection = () => {
+  if (selectedTransactions.value.length === 0) {
+    $swal.fire({
+      title: 'No Transactions Selected!',
+      text: 'Please select at least one transaction to continue.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+    });
+    return;
+  }
+  
+  // Close modal and show selected data
+  showDataSelectionModal.value = false;
+  
+  // Show success message
+  $swal.fire({
+    title: 'Data Selected Successfully!',
+    text: `${selectedTransactions.value.length} transactions have been selected and will be displayed.`,
+    icon: 'success',
+    confirmButtonText: 'OK'
+  });
+};
+
+const cancelDataSelection = () => {
+  // Reset selection and close modal
+  clearSelection();
+  showDataSelectionModal.value = false;
+  isDocumentUploaded.value = false;
+  selectedIndices.value = [];
+};
+
+// Preview file functionality
+const showPreviewModal = ref(false);
+const previewFileContent = ref('');
+const previewFileName = ref('');
+const previewFileType = ref('');
+
+const previewFile = () => {
+  console.log('previewFile function called');
+  console.log('isAIUpload.value:', isAIUpload.value);
+  console.log('formData.value:', formData.value);
+  
+  let file = null;
+  
+  if (isAIUpload.value) {
+    file = formData.value.bankStatementAIFile;
+    console.log('AI file:', file);
+  } else {
+    file = formData.value.bankStatementFile;
+    console.log('Normal file:', file);
+  }
+  
+  // Handle case where file might be in an array (FormKit sometimes returns arrays)
+  if (Array.isArray(file)) {
+    file = file[0]; // Take the first file if it's an array
+    console.log('File was in array, taking first element:', file);
+  }
+  
+  if (!file) {
+    console.log('No file selected, showing warning');
+    if ($swal) {
+      $swal.fire({
+        title: 'No File Selected!',
+        text: 'Please select a file to preview.',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
+    } else {
+      alert('No File Selected! Please select a file to preview.');
+    }
+    return;
+  }
+  
+  console.log('File selected:', file.name);
+  previewFileName.value = file.name;
+  previewFileType.value = getFileTypeFromName(file.name);
+  
+  // Handle different file types
+  if (file.name.toLowerCase().endsWith('.pdf')) {
+    console.log('PDF file detected');
+    // For PDF files, show the screenshot image
+    previewFileContent.value = 'IMAGE_PREVIEW'; // Special flag to indicate image preview
+    showPreviewModal.value = true;
+    console.log('Modal should be shown, showPreviewModal.value:', showPreviewModal.value);
+  } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+    console.log('Excel file detected');
+    // For Excel files, show a message
+    previewFileContent.value = 'Excel file preview shows raw data. The file will be properly formatted during upload.';
+    showPreviewModal.value = true;
+    console.log('Modal should be shown, showPreviewModal.value:', showPreviewModal.value);
+  } else {
+    console.log('Text file detected');
+    // For CSV and TXT files, read and show the content
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      console.log('File read successfully');
+      previewFileContent.value = event.target.result;
+      showPreviewModal.value = true;
+      console.log('Modal should be shown, showPreviewModal.value:', showPreviewModal.value);
+    };
+    
+    reader.onerror = () => {
+      console.log('File read error');
+      if ($swal) {
+        $swal.fire({
+          title: 'Preview Error!',
+          text: 'Unable to read file content. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        alert('Preview Error! Unable to read file content. Please try again.');
+      }
+    };
+    
+    // Read text-based files
+    reader.readAsText(file);
+  }
+};
+
+const closePreviewModal = () => {
+  showPreviewModal.value = false;
+  previewFileContent.value = '';
+  previewFileName.value = '';
+  previewFileType.value = '';
 };
 </script>
 
